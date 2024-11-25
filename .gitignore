@@ -1,0 +1,16 @@
+/bazel-*
+/.idea
+.DS_Store
+*.pyc
+*.egg-info/
+*.swp
+node_modules
+/tmp*
+/dist*
+*.dataloop
+*.ipynb
+/venv
+.venv
+*.pt
+/train
+/val
