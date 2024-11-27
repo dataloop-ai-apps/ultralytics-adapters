@@ -1,4 +1,4 @@
-torch==2.0.0
-ultralytics==8.2.22
+ultralytics==8.3.37
+numpy==1.23.4
 dtlpy
 pyyaml

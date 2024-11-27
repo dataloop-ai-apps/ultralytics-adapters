@@ -1,13 +1,14 @@
+from dtlpyconverters import services, yolo_converters
 from ultralytics import YOLO
 from PIL import Image
 import dtlpy as dl
+import numpy as np
 import logging
 import torch
+import shutil
+import yaml
 import PIL
 import os
-import yaml
-import shutil
-import numpy as np
 import cv2
 
 logger = logging.getLogger('YOLOv9Adapter')
@@ -16,24 +17,27 @@ logger = logging.getLogger('YOLOv9Adapter')
 PIL.Image.MAX_IMAGE_PIXELS = 933120000
 
 
-@dl.Package.decorators.module(description='Model Adapter for Yolov9 object detection',
-                              name='model-adapter',
-                              init_inputs={'model_entity': dl.Model})
 class Adapter(dl.BaseModelAdapter):
 
     def load(self, local_path, **kwargs):
-        self.confidence_threshold = self.configuration.get('conf_thres', 0.25)
-        model_filename = self.configuration.get('weights_filename', 'yolov9e.pt')
-        model_url = self.configuration.get('weights_url', None)
+        model_filename = self.configuration.get('weights_filename', 'yolov9c.pt')
+        self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+        model_filepath = os.path.normpath(os.path.join(local_path, model_filename))
+        default_weights = os.path.join('/tmp/app/weights', model_filename)
 
-        device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-        model_filepath = os.path.join(local_path, model_filename)
         if os.path.isfile(model_filepath):
-            model = YOLO(model_filepath)  # pass any model type
+            model = YOLO(model_filepath)
+        elif os.path.isfile(default_weights):
+            model = YOLO(default_weights)
+
         else:
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
-            model = YOLO(model_url)  # pass any model type
-        model.to(device=device)
+            url = 'https://github.com/ultralytics/assets/releases/download/v8.2.0/' + model_filename
+            model = YOLO(url)  # pass any model type
+        model.to(device=self.device)
+        logger.info(f"Model loaded successfully, Device: {self.device}")
+
+        self.confidence_threshold = self.configuration.get('conf_thres', 0.25)
         self.model = model
         self.update_tracker_configs()
 
@@ -53,42 +57,60 @@ class Adapter(dl.BaseModelAdapter):
             raise ValueError(
                 'Couldnt find validation set. Yolov9 requires train and validation set for training. Add a validation set DQL filter in the dl.Model metadata')
 
+        model_output_type = self.model_entity.output_type
         for subset, filters_dict in subsets.items():
-            # TODO Depends on model output type
             filters = dl.Filters(custom_filter=filters_dict)
-            filters.add_join(field='type', values='box')
+            filters.add_join(field='type', values=model_output_type)
             filters.page_size = 0
             pages = self.model_entity.dataset.items.list(filters=filters)
             if pages.items_count == 0:
                 raise ValueError(
                     f'Could find box annotations in subset {subset}. Cannot train without annotation in the data subsets')
 
-        #########
-        # Paths #
-        #########
+        self.dtlpy_to_yolo(input_path=data_path, output_path=data_path, model_entity=self.model_entity)
 
-        train_path = os.path.join(data_path, 'train', 'json')
-        validation_path = os.path.join(data_path, 'validation', 'json')
-        label_to_id_map = self.model_entity.label_to_id_map
+        # by subsets
+        for subset_name in self.model_entity.metadata.get('system', {}).get("subsets", {}):
+            src_images_path = os.path.join(data_path, subset_name, 'items')
+            dst_images_path = os.path.join(data_path, subset_name, 'images')
+            self.copy_files(src_images_path, dst_images_path)
 
-        #################
-        # Convert Train #
-        #################
-        converter = dl.utilities.converter.Converter()
-        converter.labels = label_to_id_map
-        converter.convert_directory(local_path=train_path,
-                                    dataset=self.model_entity.dataset,
-                                    to_format='yolo',
-                                    from_format='dataloop')
-        ######################
-        # Convert Validation #
-        ######################
-        converter = dl.utilities.converter.Converter()
-        converter.labels = label_to_id_map
-        converter.convert_directory(local_path=validation_path,
-                                    dataset=self.model_entity.dataset,
-                                    to_format='yolo',
-                                    from_format='dataloop')
+            src_labels_path = os.path.join(data_path, 'labels', subset_name, 'annotations')
+            dst_labels_path = os.path.join(data_path, subset_name, 'labels')
+            self.copy_files(src_labels_path, dst_labels_path)
+
+        if len(self.model_entity.labels) == 0:
+            raise ValueError(
+                'model.labels is empty. Model entity must have labels')
+
+    def dtlpy_to_yolo(self, input_path, output_path, model_entity: dl.Model):
+        default_train_path = os.path.join(input_path, 'train', 'json')
+        default_validation_path = os.path.join(input_path, 'validation', 'json')
+
+        model_entity.dataset.instance_map = model_entity.label_to_id_map
+
+        # Convert train and validations sets to yolo format using dtlpy converters
+        self.convert_dataset_yolo(input_path=default_train_path,
+                                  output_path=os.path.join(output_path, 'labels', 'train'),
+                                  dataset=model_entity.dataset)
+        self.convert_dataset_yolo(input_path=default_validation_path,
+                                  output_path=os.path.join(output_path, 'labels', 'validation'),
+                                  dataset=model_entity.dataset)
+
+    @staticmethod
+    def convert_dataset_yolo(output_path, dataset, input_path=None):
+        conv = yolo_converters.DataloopToYolo(output_annotations_path=output_path,
+                                              input_annotations_path=input_path,
+                                              download_items=False,
+                                              download_annotations=False,
+                                              dataset=dataset)
+
+        yolo_converter_services = services.converters_service.DataloopConverters()
+        loop = yolo_converter_services._get_event_loop()
+        try:
+            loop.run_until_complete(conv.convert_dataset())
+        except Exception as e:
+            raise e
 
     def update_tracker_configs(self):
         botsort_configs = self.configuration.get('botsort_configs', dict())
@@ -141,8 +163,12 @@ class Adapter(dl.BaseModelAdapter):
                 if os.path.isfile(file_path):
                     # Get the relative path from the source directory
                     relative_path = os.path.relpath(subfolder, src_path)
+                    if relative_path == ".":
+                        new_filename = filename  # Keep the original filename for root files
+                    else:
+                        new_filename = f"{relative_path.replace(os.sep, '_')}_{filename}"
                     # Create a new file name with the relative path included
-                    new_filename = f"{relative_path.replace(os.sep, '_')}_{filename}"
+                    # new_filename = f"{relative_path.replace(os.sep, '_')}_{filename}"
                     new_file_path = os.path.join(dst_path, new_filename)
                     shutil.copy(file_path, new_file_path)
 
@@ -163,34 +189,11 @@ class Adapter(dl.BaseModelAdapter):
         name = os.path.basename(output_path)
 
         # https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data#13-organize-directories
-        train_name = 'train'
-        val_name = 'validation'
-        src_images_path_train = os.path.join(data_path, 'train', 'items')
-        dst_images_path_train = os.path.join(data_path, train_name, 'images')
-        src_images_path_val = os.path.join(data_path, 'validation', 'items')
-        dst_images_path_val = os.path.join(data_path, val_name, 'images')
-        src_labels_path_train = os.path.join(data_path, 'train', 'yolo')
-        dst_labels_path_train = os.path.join(data_path, train_name, 'labels')
-        src_labels_path_val = os.path.join(data_path, 'validation', 'yolo')
-        dst_labels_path_val = os.path.join(data_path, val_name, 'labels')
-
-        # copy images and labels to train and validation directories
-        self.copy_files(src_images_path_train, dst_images_path_train)  # add dir to name
-        self.copy_files(src_images_path_val, dst_images_path_val)
-        self.copy_files(src_labels_path_train, dst_labels_path_train)
-        self.copy_files(src_labels_path_val, dst_labels_path_val)
-
-        # check if validation exists
-        if not os.path.isdir(dst_images_path_val):
-            raise ValueError(
-                'Couldnt find validation set. Yolov8 requires train and validation set for training. Add a validation set DQL filter in the dl.Model metadata')
-        if len(self.model_entity.labels) == 0:
-            raise ValueError(
-                'model.labels is empty. Model entity must have labels')
+        # https://docs.ultralytics.com/datasets/
 
         params = {'path': os.path.realpath(data_path),  # must be full path otherwise the train adds "datasets" to it
-                  'train': train_name,
-                  'val': val_name,
+                  'train': 'train',
+                  'val': 'validation',
                   'names': list(self.model_entity.label_to_id_map.keys())
                   }
 
@@ -271,16 +274,21 @@ class Adapter(dl.BaseModelAdapter):
                                                   'model_id': self.model_entity.id,
                                                   'confidence': conf})
 
-    def create_segmentation_annotation(self, res, annotation_collection):
+    def create_segmentation_annotation(self, res, annotation_collection, output_type):
         for idx, d in enumerate(reversed(res.masks)):
             cls = int(res.boxes[idx].cls.squeeze())
             conf = float(res.boxes[idx].conf.squeeze())
-            mask = cv2.resize(d.data[0].numpy(), (res.orig_shape[1], res.orig_shape[0]), cv2.INTER_NEAREST)
+            mask = cv2.resize(d.data[0].to(self.device).cpu().numpy(), (res.orig_shape[1], res.orig_shape[0]),
+                              cv2.INTER_NEAREST)
             if conf < self.confidence_threshold:
                 continue
             label = res.names[cls]
-            annotation_collection.add(annotation_definition=dl.Segmentation(geo=mask,
-                                                                            label=label),
+            if output_type == 'segment':  # polygon
+                annotation = dl.Polygon.from_segmentation(mask=mask, label=label)
+            else:  # mask
+                annotation = dl.Segmentation(geo=mask, label=label)
+
+            annotation_collection.add(annotation_definition=annotation,
                                       model_info={'name': self.model_entity.name,
                                                   'model_id': self.model_entity.id,
                                                   'confidence': conf})
@@ -288,19 +296,19 @@ class Adapter(dl.BaseModelAdapter):
     def predict(self, batch, **kwargs):
         include_untracked = self.configuration.get('botsort_configs', dict()).get('include_untracked', False)
         batch_annotations = list()
+        output_type = self.model_entity.output_type
         for stream, item in batch:
             track_ids = list(range(1000, 10001))
             if 'image' in item.mimetype:
                 image_annotations = dl.AnnotationCollection()
                 results = self.model.predict(source=stream, save=False, save_txt=False)  # save predictions as labels
                 for i_img, res in enumerate(results):  # per image
-                    if model.output_type == 'box':
+                    if output_type == 'box':
                         self.create_box_annotation(res, image_annotations)
-                    elif model.output_type == 'segmentation':
-                        # TODO Add polygon support
-                        self.create_segmentation_annotation(res, image_annotations)
+                    elif output_type == 'binary' or output_type == 'segment':  # SEGMENTATION
+                        self.create_segmentation_annotation(res, image_annotations, output_type)
                     else:
-                        raise ValueError(f'Unsupported output type: {model.output_type}')
+                        raise ValueError(f'Unsupported output type: {output_type}')
                 batch_annotations.append(image_annotations)
             if 'video' in item.mimetype:
                 image_annotations = item.annotations.builder()
@@ -338,11 +346,88 @@ class Adapter(dl.BaseModelAdapter):
                                               frame_num=idx
                                               )
                 batch_annotations.append(image_annotations)
+
         return batch_annotations
 
 
 if __name__ == '__main__':
-    model = dl.models.get(model_id='')
+    import json
+
+    # BINARY - SEGMENTATION ( output type binary)
+    # predict
+    dl.setenv('rc')
+    # model = dl.models.get(model_id='67447f0d1e5501718886f948')
+    # runner = Adapter(model_entity=model)
+    # item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
+    # runner.predict_items(items=[item1])
+    # train
+
+    # model.dataset_id = "666a8eea63543373f98f178c"
+    # model.dataset.metadata['system']['subsets'] = {
+    #     'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+    #     'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
+    # }
+    # model.metadata['system'] = {}
+    # model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+    #                                        'validation': dl.Filters(field='dir', values='/val').prepare()}
+    # model.update(True)
+    #
+    # runner.train_model(model)
+
+    # predict again
+
+    # POLY ( output type segment)
+    # predict
+    # dl.setenv('rc')
+    # model = dl.models.get(model_id='6746e0afecc656ce0d25a515')
+    # runner = Adapter(model_entity=model)
+    # item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
+    # runner.predict_items(items=[item1])
+
+    # train
+    # model.dataset_id = "666a8eea63543373f98f178c"
+    # model.id_to_label_map = {'0': 'cat', '1': 'dog'}
+    # model.label_to_id_map = {0: 'cat', 1: 'dog'}
+    # model.labels = ['cat', 'dog']
+    # model.output_type = 'segment'
+    # model.dataset.metadata['system']['subsets'] = {
+    #     'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+    #     'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
+    # }
+    # model.metadata['system'] = {}
+    # model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+    #                                        'validation': dl.Filters(field='dir', values='/val').prepare()}
+    # model.update(True)
+    #
+    # runner.train_model(model)
+
+    # predict again
+
+    # BOX
+    # predict
+    # dl.setenv('rc')
+    model = dl.models.get(model_id='6746eeafecc6566c8825a574')
     runner = Adapter(model_entity=model)
-    item1 = dl.items.get(item_id='')
+    # item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
+    # runner.predict_items(items=[item1])
+
+    # train
+    model.dataset_id = "6746e3d3a79ea115a5e4f5a5"
+    model.id_to_label_map = {'0': 'cat', '1': 'dog'}
+    model.label_to_id_map = {0: 'cat', 1: 'dog'}
+    model.labels = ['cat', 'dog']
+    model.output_type = 'box'
+    model.dataset.metadata['system']['subsets'] = {
+        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+        'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
+    }
+    model.metadata['system'] = {}
+    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+                                           'validation': dl.Filters(field='dir', values='/val').prepare()}
+    model.update(True)
+
+    runner.train_model(model)
+
+    # predict again
+    item1 = dl.items.get(item_id='6746e8db6ef80c53b8e7cb77')
     runner.predict_items(items=[item1])
