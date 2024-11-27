@@ -275,23 +275,24 @@ class Adapter(dl.BaseModelAdapter):
                                                   'confidence': conf})
 
     def create_segmentation_annotation(self, res, annotation_collection, output_type):
-        for idx, d in enumerate(reversed(res.masks)):
-            cls = int(res.boxes[idx].cls.squeeze())
-            conf = float(res.boxes[idx].conf.squeeze())
-            mask = cv2.resize(d.data[0].to(self.device).cpu().numpy(), (res.orig_shape[1], res.orig_shape[0]),
-                              cv2.INTER_NEAREST)
-            if conf < self.confidence_threshold:
-                continue
-            label = res.names[cls]
-            if output_type == 'segment':  # polygon
-                annotation = dl.Polygon.from_segmentation(mask=mask, label=label)
-            else:  # mask
-                annotation = dl.Segmentation(geo=mask, label=label)
+        if res.masks is not None:
+            for idx, d in enumerate(reversed(res.masks)):
+                cls = int(res.boxes[idx].cls.squeeze())
+                conf = float(res.boxes[idx].conf.squeeze())
+                mask = cv2.resize(d.data[0].to(self.device).cpu().numpy(), (res.orig_shape[1], res.orig_shape[0]),
+                                  cv2.INTER_NEAREST)
+                if conf < self.confidence_threshold:
+                    continue
+                label = res.names[cls]
+                if output_type == 'segment':  # polygon
+                    annotation = dl.Polygon.from_segmentation(mask=mask, label=label)
+                else:  # mask
+                    annotation = dl.Segmentation(geo=mask, label=label)
 
-            annotation_collection.add(annotation_definition=annotation,
-                                      model_info={'name': self.model_entity.name,
-                                                  'model_id': self.model_entity.id,
-                                                  'confidence': conf})
+                annotation_collection.add(annotation_definition=annotation,
+                                          model_info={'name': self.model_entity.name,
+                                                      'model_id': self.model_entity.id,
+                                                      'confidence': conf})
 
     def predict(self, batch, **kwargs):
         include_untracked = self.configuration.get('botsort_configs', dict()).get('include_untracked', False)
@@ -379,8 +380,8 @@ if __name__ == '__main__':
     # POLY ( output type segment)
     # predict
     # dl.setenv('rc')
-    # model = dl.models.get(model_id='6746e0afecc656ce0d25a515')
-    # runner = Adapter(model_entity=model)
+    model = dl.models.get(model_id='6746e0afecc656ce0d25a515')
+    runner = Adapter(model_entity=model)
     # item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
     # runner.predict_items(items=[item1])
 
@@ -403,31 +404,34 @@ if __name__ == '__main__':
 
     # predict again
 
+    item1 = dl.items.get(item_id='6746e8db6ef80c53b8e7cb77')
+    runner.predict_items(items=[item1])
+
     # BOX
     # predict
     # dl.setenv('rc')
-    model = dl.models.get(model_id='6746eeafecc6566c8825a574')
-    runner = Adapter(model_entity=model)
+    # model = dl.models.get(model_id='6746eeafecc6566c8825a574')
+    # runner = Adapter(model_entity=model)
     # item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
     # runner.predict_items(items=[item1])
 
     # train
-    model.dataset_id = "6746e3d3a79ea115a5e4f5a5"
-    model.id_to_label_map = {'0': 'cat', '1': 'dog'}
-    model.label_to_id_map = {0: 'cat', 1: 'dog'}
-    model.labels = ['cat', 'dog']
-    model.output_type = 'box'
-    model.dataset.metadata['system']['subsets'] = {
-        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-        'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
-    }
-    model.metadata['system'] = {}
-    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-                                           'validation': dl.Filters(field='dir', values='/val').prepare()}
-    model.update(True)
-
-    runner.train_model(model)
-
-    # predict again
-    item1 = dl.items.get(item_id='6746e8db6ef80c53b8e7cb77')
-    runner.predict_items(items=[item1])
+    # model.dataset_id = "6746e3d3a79ea115a5e4f5a5"
+    # model.id_to_label_map = {'0': 'cat', '1': 'dog'}
+    # model.label_to_id_map = {0: 'cat', 1: 'dog'}
+    # model.labels = ['cat', 'dog']
+    # model.output_type = 'box'
+    # model.dataset.metadata['system']['subsets'] = {
+    #     'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+    #     'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
+    # }
+    # model.metadata['system'] = {}
+    # model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+    #                                        'validation': dl.Filters(field='dir', values='/val').prepare()}
+    # model.update(True)
+    #
+    # runner.train_model(model)
+    #
+    # # predict again
+    # item1 = dl.items.get(item_id='6746e8db6ef80c53b8e7cb77')
+    # runner.predict_items(items=[item1])
