@@ -11,7 +11,7 @@ import PIL
 import os
 import cv2
 
-logger = logging.getLogger('YOLOv9Adapter')
+logger = logging.getLogger('UltralyticsAdapter')
 
 # set max image size
 PIL.Image.MAX_IMAGE_PIXELS = 933120000
@@ -57,6 +57,13 @@ class Adapter(dl.BaseModelAdapter):
             raise ValueError(
                 'Couldnt find validation set. Yolov9 requires train and validation set for training. Add a validation set DQL filter in the dl.Model metadata')
 
+        if len(self.model_entity.labels) == 0:
+            raise ValueError(
+                'model.labels is empty. Model entity must have labels')
+
+        ##########################
+        # Convert to YOLO Format #
+        ##########################
         model_output_type = self.model_entity.output_type
         for subset, filters_dict in subsets.items():
             filters = dl.Filters(custom_filter=filters_dict)
@@ -78,10 +85,6 @@ class Adapter(dl.BaseModelAdapter):
             src_labels_path = os.path.join(data_path, 'labels', subset_name, 'annotations')
             dst_labels_path = os.path.join(data_path, subset_name, 'labels')
             self.copy_files(src_labels_path, dst_labels_path)
-
-        if len(self.model_entity.labels) == 0:
-            raise ValueError(
-                'model.labels is empty. Model entity must have labels')
 
     def dtlpy_to_yolo(self, input_path, output_path, model_entity: dl.Model):
         default_train_path = os.path.join(input_path, 'train', 'json')
