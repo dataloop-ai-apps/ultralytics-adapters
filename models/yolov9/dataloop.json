@@ -518,7 +518,9 @@
             "new_track_thresh": 0.5,
             "track_buffer": 30,
             "match_thresh": 0.8,
-            "include_untracked": false
+            "include_untracked": false,
+            "amp": false,
+            "freeze": 10
           }
         },
         "inputType": "image",
@@ -627,7 +629,9 @@
             "new_track_thresh": 0.5,
             "track_buffer": 30,
             "match_thresh": 0.8,
-            "include_untracked": false
+            "include_untracked": false,
+            "amp": false,
+            "freeze": 10
           }
         },
         "inputType": "image",
@@ -736,7 +740,9 @@
             "new_track_thresh": 0.5,
             "track_buffer": 30,
             "match_thresh": 0.8,
-            "include_untracked": false
+            "include_untracked": false,
+            "amp": false,
+            "freeze": 10
           }
         },
         "inputType": "image",

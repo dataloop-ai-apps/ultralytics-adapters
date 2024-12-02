@@ -68,9 +68,14 @@ class Adapter(dl.BaseModelAdapter):
         ##########################
 
         model_output_type = self.model_entity.output_type
+        if "segment" in model_output_type or "binary" in model_output_type:
+            values = ["segment", "binary"]
+        else:
+            values = [model_output_type]
+
         for subset, filters_dict in subsets.items():
             filters = dl.Filters(custom_filter=filters_dict)
-            filters.add_join(field='type', values=model_output_type)
+            filters.add_join(field='type', values=values, operator=dl.FILTERS_OPERATIONS_IN)
             filters.page_size = 0
             pages = self.model_entity.dataset.items.list(filters=filters)
             if pages.items_count == 0:
@@ -359,101 +364,3 @@ class Adapter(dl.BaseModelAdapter):
                 batch_annotations.append(image_annotations)
 
         return batch_annotations
-
-
-if __name__ == '__main__':
-    import json
-
-    ##########
-    # BINARY #
-    ##########
-
-    # BINARY - SEGMENTATION ( output type binary)
-    # predict
-    dl.setenv('rc')
-    # model = dl.models.get(model_id='67447f0d1e5501718886f948')
-    # runner = Adapter(model_entity=model)
-    # item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
-    # runner.predict_items(items=[item1])
-    # train
-
-    # model.dataset_id = "666a8eea63543373f98f178c"
-    # model.dataset.metadata['system']['subsets'] = {
-    #     'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-    #     'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
-    # }
-    # model.metadata['system'] = {}
-    # model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-    #                                        'validation': dl.Filters(field='dir', values='/val').prepare()}
-    # model.update(True)
-    #
-    # runner.train_model(model)
-
-    # predict again
-
-    ########
-    # POLY #
-    ########
-
-    # POLY ( output type segment)
-    # predict
-    dl.setenv('rc')
-    model = dl.models.get(model_id='6746e0afecc656ce0d25a515')
-    runner = Adapter(model_entity=model)
-    item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
-    runner.predict_items(items=[item1])
-
-    # train
-    model.dataset_id = "666a8eea63543373f98f178c"
-    model.id_to_label_map = {'0': 'cat', '1': 'dog'}
-    model.label_to_id_map = {0: 'cat', 1: 'dog'}
-    model.labels = ['cat', 'dog']
-    model.output_type = 'segment'
-    model.dataset.metadata['system']['subsets'] = {
-        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-        'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
-    }
-    model.metadata['system'] = {}
-    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-                                           'validation': dl.Filters(field='dir', values='/val').prepare()}
-    model.update(True)
-
-    runner.train_model(model)
-
-    # predict again
-
-    item1 = dl.items.get(item_id='6746e8db6ef80c53b8e7cb77')
-    runner.predict_items(items=[item1])
-
-    #######
-    # BOX #
-    #######
-
-    # predict
-    # dl.setenv('prod')
-    # model = dl.models.get(model_id='674dafef1062b3f1898de426')  # yolov9c-ukcNf
-    # runner = Adapter(model_entity=model)
-    # # item1 = dl.items.get(item_id='674d719c98f2f6ee0b4a3e1e')  # BUSES
-    # # runner.predict_items(items=[item1])
-    #
-    # # train
-    # model.dataset_id = "674323d70497c573a3d2f64c"  # rodent-combined
-    # model.id_to_label_map = {'0': 'Rodent'}
-    # model.label_to_id_map = {0: 'Rodent'}
-    # model.labels = ['Rodent']
-    # model.output_type = 'box'
-    # model.dataset.metadata['system']['subsets'] = {
-    #     'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-    #     'validation': json.dumps(dl.Filters(field='dir', values='/validation').prepare()),
-    # }
-    # model.metadata['system'] = {}
-    # model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-    #                                        'validation': dl.Filters(field='dir', values='/validation').prepare()}
-    # model.update(True)
-    #
-    # runner.train_model(model)
-    # #
-    # # # predict again
-    # item1 = dl.items.get(item_id='66d85aa478124a80402a290f')
-    # item2 = dl.items.get(item_id='66d85aa3ccefbc46534a41b9')
-    # runner.predict_items(items=[item1, item2])
