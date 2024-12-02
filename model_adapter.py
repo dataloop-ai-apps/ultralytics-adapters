@@ -3,6 +3,7 @@ from ultralytics import YOLO
 from PIL import Image
 import dtlpy as dl
 import numpy as np
+import ultralytics
 import logging
 import torch
 import shutil
@@ -20,6 +21,7 @@ PIL.Image.MAX_IMAGE_PIXELS = 933120000
 class Adapter(dl.BaseModelAdapter):
 
     def load(self, local_path, **kwargs):
+        logger.info(f"ULTRALYTICS VERSION: {ultralytics.__version__}")
         model_filename = self.configuration.get('weights_filename', 'yolov9c.pt')
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         model_filepath = os.path.normpath(os.path.join(local_path, model_filename))
@@ -64,6 +66,7 @@ class Adapter(dl.BaseModelAdapter):
         ##########################
         # Convert to YOLO Format #
         ##########################
+
         model_output_type = self.model_entity.output_type
         for subset, filters_dict in subsets.items():
             filters = dl.Filters(custom_filter=filters_dict)
@@ -184,6 +187,8 @@ class Adapter(dl.BaseModelAdapter):
         device = self.configuration.get('device', None)
         augment = self.configuration.get('augment', True)
         yaml_config = self.configuration.get('yaml_config', dict())
+        freeze = self.configuration.get('freeze', 10)
+        amp = self.configuration.get("amp", False)
         resume = start_epoch > 0
         if device is None:
             device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
@@ -257,6 +262,8 @@ class Adapter(dl.BaseModelAdapter):
                          name=name,
                          workers=0,
                          imgsz=imgsz,
+                         freeze=freeze,  # layers to freeze
+                         amp=amp,  # https://github.com/ultralytics/ultralytics/issues/280 False for NaN losses
                          project=project_name)
 
     def create_box_annotation(self, res, annotation_collection):
@@ -357,6 +364,10 @@ class Adapter(dl.BaseModelAdapter):
 if __name__ == '__main__':
     import json
 
+    ##########
+    # BINARY #
+    ##########
+
     # BINARY - SEGMENTATION ( output type binary)
     # predict
     dl.setenv('rc')
@@ -380,61 +391,69 @@ if __name__ == '__main__':
 
     # predict again
 
+    ########
+    # POLY #
+    ########
+
     # POLY ( output type segment)
     # predict
-    # dl.setenv('rc')
+    dl.setenv('rc')
     model = dl.models.get(model_id='6746e0afecc656ce0d25a515')
     runner = Adapter(model_entity=model)
-    # item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
-    # runner.predict_items(items=[item1])
+    item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
+    runner.predict_items(items=[item1])
 
     # train
-    # model.dataset_id = "666a8eea63543373f98f178c"
-    # model.id_to_label_map = {'0': 'cat', '1': 'dog'}
-    # model.label_to_id_map = {0: 'cat', 1: 'dog'}
-    # model.labels = ['cat', 'dog']
-    # model.output_type = 'segment'
-    # model.dataset.metadata['system']['subsets'] = {
-    #     'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-    #     'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
-    # }
-    # model.metadata['system'] = {}
-    # model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-    #                                        'validation': dl.Filters(field='dir', values='/val').prepare()}
-    # model.update(True)
-    #
-    # runner.train_model(model)
+    model.dataset_id = "666a8eea63543373f98f178c"
+    model.id_to_label_map = {'0': 'cat', '1': 'dog'}
+    model.label_to_id_map = {0: 'cat', 1: 'dog'}
+    model.labels = ['cat', 'dog']
+    model.output_type = 'segment'
+    model.dataset.metadata['system']['subsets'] = {
+        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+        'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
+    }
+    model.metadata['system'] = {}
+    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+                                           'validation': dl.Filters(field='dir', values='/val').prepare()}
+    model.update(True)
+
+    runner.train_model(model)
 
     # predict again
 
     item1 = dl.items.get(item_id='6746e8db6ef80c53b8e7cb77')
     runner.predict_items(items=[item1])
 
-    # BOX
-    # predict
-    # dl.setenv('rc')
-    # model = dl.models.get(model_id='6746eeafecc6566c8825a574')
-    # runner = Adapter(model_entity=model)
-    # item1 = dl.items.get(item_id='666a90378be7696aeef5362c')
-    # runner.predict_items(items=[item1])
+    #######
+    # BOX #
+    #######
 
-    # train
-    # model.dataset_id = "6746e3d3a79ea115a5e4f5a5"
-    # model.id_to_label_map = {'0': 'cat', '1': 'dog'}
-    # model.label_to_id_map = {0: 'cat', 1: 'dog'}
-    # model.labels = ['cat', 'dog']
+    # predict
+    # dl.setenv('prod')
+    # model = dl.models.get(model_id='674dafef1062b3f1898de426')  # yolov9c-ukcNf
+    # runner = Adapter(model_entity=model)
+    # # item1 = dl.items.get(item_id='674d719c98f2f6ee0b4a3e1e')  # BUSES
+    # # runner.predict_items(items=[item1])
+    #
+    # # train
+    # model.dataset_id = "674323d70497c573a3d2f64c"  # rodent-combined
+    # model.id_to_label_map = {'0': 'Rodent'}
+    # model.label_to_id_map = {0: 'Rodent'}
+    # model.labels = ['Rodent']
     # model.output_type = 'box'
     # model.dataset.metadata['system']['subsets'] = {
     #     'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-    #     'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
+    #     'validation': json.dumps(dl.Filters(field='dir', values='/validation').prepare()),
     # }
     # model.metadata['system'] = {}
     # model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-    #                                        'validation': dl.Filters(field='dir', values='/val').prepare()}
+    #                                        'validation': dl.Filters(field='dir', values='/validation').prepare()}
     # model.update(True)
     #
     # runner.train_model(model)
-    #
-    # # predict again
-    # item1 = dl.items.get(item_id='6746e8db6ef80c53b8e7cb77')
-    # runner.predict_items(items=[item1])
+    # #
+    # # # predict again
+    # item1 = dl.items.get(item_id='66d85aa478124a80402a290f')
+    # item2 = dl.items.get(item_id='66d85aa3ccefbc46534a41b9')
+    # runner.predict_items(items=[item1, item2])

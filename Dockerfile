@@ -10,8 +10,7 @@ RUN wget -O /tmp/app/weights/yolov9c-seg.pt https://github.com/ultralytics/asset
 RUN wget -O /tmp/app/weights/yolov9c.pt https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov9c.pt
 
 RUN pip install --user \
-    ultralytics==8.3.37 \
-    numpy==1.24.0 \
+    ultralytics \
     pyyaml \
     git+https://github.com/dataloop-ai-apps/dtlpy-converters.git
 
