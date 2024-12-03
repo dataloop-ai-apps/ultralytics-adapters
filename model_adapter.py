@@ -39,7 +39,6 @@ class Adapter(dl.BaseModelAdapter):
         model.to(device=self.device)
         logger.info(f"Model loaded successfully, Device: {self.device}")
 
-        self.confidence_threshold = self.configuration.get('conf_thres', 0.25)
         self.model = model
         self.update_tracker_configs()
 
@@ -271,11 +270,11 @@ class Adapter(dl.BaseModelAdapter):
                          amp=amp,  # https://github.com/ultralytics/ultralytics/issues/280 False for NaN losses
                          project=project_name)
 
-    def create_box_annotation(self, res, annotation_collection):
+    def create_box_annotation(self, res, annotation_collection, confidence_threshold):
         for d in reversed(res.boxes):
             cls = int(d.cls.squeeze())
             conf = float(d.conf.squeeze())
-            if conf < self.confidence_threshold:
+            if conf < confidence_threshold:
                 continue
             label = res.names[cls]
             xyxy = d.xyxy.squeeze()
@@ -289,14 +288,14 @@ class Adapter(dl.BaseModelAdapter):
                                                   'model_id': self.model_entity.id,
                                                   'confidence': conf})
 
-    def create_segmentation_annotation(self, res, annotation_collection, output_type):
+    def create_segmentation_annotation(self, res, annotation_collection, output_type, confidence_threshold):
         if res.masks is not None:
             for idx, d in enumerate(reversed(res.masks)):
                 cls = int(res.boxes[idx].cls.squeeze())
                 conf = float(res.boxes[idx].conf.squeeze())
                 mask = cv2.resize(d.data[0].to(self.device).cpu().numpy(), (res.orig_shape[1], res.orig_shape[0]),
                                   cv2.INTER_NEAREST)
-                if conf < self.confidence_threshold:
+                if conf < confidence_threshold:
                     continue
                 label = res.names[cls]
                 if output_type == 'segment':  # polygon
@@ -310,6 +309,7 @@ class Adapter(dl.BaseModelAdapter):
                                                       'confidence': conf})
 
     def predict(self, batch, **kwargs):
+        confidence_threshold = self.configuration.get('conf_thres', 0.25)
         include_untracked = self.configuration.get('botsort_configs', dict()).get('include_untracked', False)
         batch_annotations = list()
         output_type = self.model_entity.output_type
@@ -320,9 +320,9 @@ class Adapter(dl.BaseModelAdapter):
                 results = self.model.predict(source=stream, save=False, save_txt=False)  # save predictions as labels
                 for i_img, res in enumerate(results):  # per image
                     if output_type == 'box':
-                        self.create_box_annotation(res, image_annotations)
+                        self.create_box_annotation(res, image_annotations, confidence_threshold)
                     elif output_type == 'binary' or output_type == 'segment':  # SEGMENTATION
-                        self.create_segmentation_annotation(res, image_annotations, output_type)
+                        self.create_segmentation_annotation(res, image_annotations, output_type, confidence_threshold)
                     else:
                         raise ValueError(f'Unsupported output type: {output_type}')
                 batch_annotations.append(image_annotations)
