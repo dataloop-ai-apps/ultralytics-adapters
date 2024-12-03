@@ -17,3 +17,4 @@ node_modules
 /YOLOv9
 /weights
 custom_botsort.yaml
+/v9-test

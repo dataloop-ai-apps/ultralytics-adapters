@@ -34,7 +34,7 @@ class Adapter(dl.BaseModelAdapter):
 
         else:
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
-            url = 'https://github.com/ultralytics/assets/releases/download/v8.2.0/' + model_filename
+            url = 'https://github.com/ultralytics/assets/releases/download/v8.2.0/' + model_filename  # TODO modify for each model
             model = YOLO(url)  # pass any model type
         model.to(device=self.device)
         logger.info(f"Model loaded successfully, Device: {self.device}")
@@ -53,10 +53,10 @@ class Adapter(dl.BaseModelAdapter):
         subsets = self.model_entity.metadata.get("system", dict()).get("subsets", None)
         if 'train' not in subsets:
             raise ValueError(
-                'Couldnt find train set. Yolov9 requires train and validation set for training. Add a train set DQL filter in the dl.Model metadata')
+                'Couldnt find train set. Yolo requires train and validation set for training. Add a train set DQL filter in the dl.Model metadata')
         if 'validation' not in subsets:
             raise ValueError(
-                'Couldnt find validation set. Yolov9 requires train and validation set for training. Add a validation set DQL filter in the dl.Model metadata')
+                'Couldnt find validation set. Yolo requires train and validation set for training. Add a validation set DQL filter in the dl.Model metadata')
 
         if len(self.model_entity.labels) == 0:
             raise ValueError(
@@ -67,8 +67,9 @@ class Adapter(dl.BaseModelAdapter):
         ##########################
 
         model_output_type = self.model_entity.output_type
-        if "segment" in model_output_type or "binary" in model_output_type:
-            values = ["segment", "binary"]
+        segmentation_types = ["segment", "binary"]
+        if model_output_type in segmentation_types:
+            values = segmentation_types
         else:
             values = [model_output_type]
 
@@ -84,6 +85,9 @@ class Adapter(dl.BaseModelAdapter):
         self.dtlpy_to_yolo(input_path=data_path, output_path=data_path, model_entity=self.model_entity)
 
         # by subsets
+        # https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data#13-organize-directories
+        # https://docs.ultralytics.com/datasets/
+
         for subset_name in self.model_entity.metadata.get('system', {}).get("subsets", {}):
             src_images_path = os.path.join(data_path, subset_name, 'items')
             dst_images_path = os.path.join(data_path, subset_name, 'images')
@@ -183,25 +187,39 @@ class Adapter(dl.BaseModelAdapter):
                     shutil.copy(file_path, new_file_path)
 
     def train(self, data_path, output_path, **kwargs):
-        self.model.model.args.update(self.configuration.get('modelArgs', dict()))
+        # Training Parameters
         epochs = self.configuration.get('epochs', 50)
-        start_epoch = self.configuration.get('start_epoch', 0)
         batch_size = self.configuration.get('batch_size', 2)
         imgsz = self.configuration.get('imgsz', 640)
-        device = self.configuration.get('device', None)
-        augment = self.configuration.get('augment', True)
-        yaml_config = self.configuration.get('yaml_config', dict())
+        cache = self.configuration.get('cache', False)
+        optimizer = self.configuration.get('optimizer', 'auto')
+        seed = self.configuration.get('seed', 0)
+        deterministic = self.configuration.get('deterministic', True)
+        single_cls = self.configuration.get('single_cls', False)
+        classes = self.configuration.get('classes', None)
+        rect = self.configuration.get('rect', False)
+        cos_lr = self.configuration.get('cos_lr', False)
+        close_mosaic = self.configuration.get('close_mosaic', 10)
+        fraction = self.configuration.get('fraction', 1.0)
+        lr0 = self.configuration.get('lr0', 0.01)
+        lrf = self.configuration.get('lrf', 0.01)
+        weight_decay = self.configuration.get('weight_decay', 0.005)
+        warmup_epochs = self.configuration.get('warmup_epochs', 3.0)
+        box = self.configuration.get('box', 7.5)
+        cls = self.configuration.get('cls', 0.5)
+        dfl = self.configuration.get('dfl', 1.5)
+        overlap_mask = self.configuration.get('overlap_mask', True)
+        amp = self.configuration.get('amp', False)
         freeze = self.configuration.get('freeze', 10)
-        amp = self.configuration.get("amp", False)
-        resume = start_epoch > 0
-        if device is None:
-            device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+        start_epoch = self.configuration.get('start_epoch', 0)
+        patience = self.configuration.get('patience', 100)
 
+        resume = start_epoch > 0
         project_name = os.path.dirname(output_path)
         name = os.path.basename(output_path)
 
-        # https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data#13-organize-directories
-        # https://docs.ultralytics.com/datasets/
+        # https://docs.ultralytics.com/modes/train/#augmentation-settings-and-hyperparameters
+        yaml_config = self.configuration.get('yaml_config', dict())
 
         params = {'path': os.path.realpath(data_path),  # must be full path otherwise the train adds "datasets" to it
                   'train': 'train',
@@ -256,19 +274,39 @@ class Adapter(dl.BaseModelAdapter):
             self.save_to_model(local_path=output_path, cleanup=False)
 
         self.model.add_callback(event='on_fit_epoch_end', func=on_epoch_end)
-        self.model.train(data=data_yaml_filename,
-                         exist_ok=True,  # this will override the output dir and will not create a new one
-                         resume=resume,
-                         epochs=epochs,
-                         batch=batch_size,
-                         device=device,
-                         augment=augment,
-                         name=name,
-                         workers=0,
-                         imgsz=imgsz,
-                         freeze=freeze,  # layers to freeze
-                         amp=amp,  # https://github.com/ultralytics/ultralytics/issues/280 False for NaN losses
-                         project=project_name)
+        self.model.train(
+            data=data_yaml_filename,
+            exist_ok=True,  # this will override the output dir and will not create a new one
+            resume=resume,
+            epochs=epochs,
+            batch=batch_size,
+            device=self.device,
+            name=name,
+            workers=0,
+            imgsz=imgsz,
+            freeze=freeze,  # layers to freeze
+            amp=amp,  # https://github.com/ultralytics/ultralytics/issues/280 False for NaN losses
+            project=project_name,
+            cache=cache,  # Cache the dataset
+            optimizer=optimizer,  # Optimizer setting
+            seed=seed,  # Random seed
+            deterministic=deterministic,  # Deterministic behavior
+            single_cls=single_cls,  # Treat all classes as one
+            classes=classes,  # List of class indices
+            rect=rect,  # Rectangular training
+            cos_lr=cos_lr,  # Cosine learning rate
+            close_mosaic=close_mosaic,  # Mosaic close epochs
+            fraction=fraction,  # Dataset fraction
+            lr0=lr0,  # Initial learning rate
+            lrf=lrf,  # Learning rate final multiplier
+            weight_decay=weight_decay,  # Weight decay
+            warmup_epochs=warmup_epochs,  # Warmup epochs
+            box=box,  # Box loss gain
+            cls=cls,  # Classification loss gain
+            dfl=dfl,  # DFL loss gain
+            overlap_mask=overlap_mask,  # Overlap mask usage
+            patience=patience  # Early stopping patience
+        )
 
     def create_box_annotation(self, res, annotation_collection, confidence_threshold):
         for d in reversed(res.boxes):
@@ -326,7 +364,7 @@ class Adapter(dl.BaseModelAdapter):
                     else:
                         raise ValueError(f'Unsupported output type: {output_type}')
                 batch_annotations.append(image_annotations)
-            if 'video' in item.mimetype:
+            if 'video' in item.mimetype:  # TODO CHECK THAT
                 image_annotations = item.annotations.builder()
                 results = self.model.track(source=stream,
                                            tracker='custom_botsort.yaml',
@@ -364,3 +402,36 @@ class Adapter(dl.BaseModelAdapter):
                 batch_annotations.append(image_annotations)
 
         return batch_annotations
+
+
+if __name__ == '__main__':
+    import json
+
+    # IPM TESTS
+    dl.setenv('prod')
+    model = dl.models.get(model_id="674f07e7ce09970d36cd64d5")
+    runner = Adapter(model)
+
+    # train
+    model.dataset_id = "674323d70497c573a3d2f64c"  # rodent-combined
+    model.id_to_label_map = {'0': 'Rodent'}
+    model.label_to_id_map = {0: 'Rodent'}
+    model.labels = ['Rodent']
+    model.output_type = 'box'
+    model.dataset.metadata['system']['subsets'] = {
+        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+        'validation': json.dumps(dl.Filters(field='dir', values='/validation').prepare()),
+    }
+    model.metadata['system'] = {}
+    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+                                           'validation': dl.Filters(field='dir', values='/validation').prepare()}
+    model.update(True)
+
+    runner.train_model(model)
+
+    # TEST
+    # item1 = dl.items.get(item_id='674ecaf28bf794ed2938dc61')
+    # item2 = dl.items.get(item_id='674ecaf28bf794e71b38dc63')
+    # item3 = dl.items.get(item_id='674ecaf28bf7947c2938dc62')
+    # item4 = dl.items.get(item_id='674ecaf28bf79435ca38dc60')
+    # runner.predict_items(items=[item1, item2, item3, item4])

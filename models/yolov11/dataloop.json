@@ -1,9 +1,9 @@
 {
-  "name": "yolov8",
-  "displayName": "YOLOv8",
+  "name": "yolov11",
+  "displayName": "YOLOv11",
   "version": "0.0.1",
   "scope": "public",
-  "description": "YOLOv8 is a real-time object detection model designed for tasks like detection, segmentation, and classification, offering high speed and accuracy.",
+  "description": "YOLOv11 is a real-time object detection model that enhances efficiency and accuracy through innovations like Programmable Gradient Information (PGI) and the Generalized Efficient Layer Aggregation Network (GELAN). It supports various configurations such as YOLOv11c for efficiency and YOLOv11e for maximum accuracy .",
   "attributes": {
     "Provider": "Ultralytics",
     "License": "AGPL 3.0",
@@ -23,7 +23,7 @@
   "components": {
     "computeConfigs": [
       {
-        "name": "yolov8-deploy",
+        "name": "yolov11-deploy",
         "runtime": {
           "podType": "regular-xs",
           "concurrency": 1,
@@ -36,11 +36,11 @@
         }
       },
       {
-        "name": "yolov8-train-evaluate",
+        "name": "yolov11-train-evaluate",
         "runtime": {
           "podType": "gpu-t4",
           "concurrency": 1,
-          "runnerImage": "gcr.io/viewo-g/piper/agent/gpu/yolov9:0.0.1",
+          "runnerImage": "gcr.io/viewo-g/piper/agent/gpu/yolov11:0.0.1",
           "autoscaler": {
             "type": "rabbitmq",
             "minReplicas": 0,
@@ -53,11 +53,11 @@
     ],
     "modules": [
       {
-        "name": "yolov8-module",
+        "name": "yolov11-module",
         "entryPoint": "model_adapter.py",
         "className": "Adapter",
-        "computeConfig": "yolov8-deploy",
-        "description": "Yolov8 Module",
+        "computeConfig": "yolov11-deploy",
+        "description": "Yolov11 Module",
         "initInputs": [
           {
             "type": "Model",
@@ -67,7 +67,7 @@
         "functions": [
           {
             "name": "evaluate_model",
-            "computeConfig": "yolov8-train-evaluate",
+            "computeConfig": "yolov11-train-evaluate",
             "input": [
               {
                 "type": "Model",
@@ -99,7 +99,7 @@
             ],
             "displayName": "Evaluate a Model",
             "displayIcon": "",
-            "description": "Function to evaluate YOLOv8 model performance"
+            "description": "Function to evaluate YOLOv11 model performance"
           },
           {
             "name": "predict_items",
@@ -124,7 +124,7 @@
             ],
             "displayName": "Predict Items",
             "displayIcon": "",
-            "description": "Function to run YOLOv8 inference on items"
+            "description": "Function to run YOLOv11 inference on items"
           },
           {
             "name": "predict_dataset",
@@ -143,11 +143,11 @@
             "output": [],
             "displayName": "Predict Dataset",
             "displayIcon": "",
-            "description": "Function to run YOLOv8 inference on a dataset."
+            "description": "Function to run YOLOv11 inference on a dataset."
           },
           {
             "name": "train_model",
-            "computeConfig": "yolov8-train-evaluate",
+            "computeConfig": "yolov11-train-evaluate",
             "input": [
               {
                 "type": "Model",
@@ -164,31 +164,78 @@
             ],
             "displayName": "Train a Model",
             "displayIcon": "",
-            "description": "Function to train YOLOv8 model"
+            "description": "Function to train YOLOv11 model"
           }
         ]
       }
     ],
     "models": [
       {
-        "name": "yolov8-Object-Detection",
-        "moduleName": "yolov8-module",
+        "name": "yolov11-Object-Detection",
+        "moduleName": "yolov11-module",
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
-          "weights_filename": "yolov8m.pt",
-          "epochs": 10,
-          "batch_size": 4,
+          "weights_filename": "yolov11c.pt",
+          "weights_url": "https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov11c.pt",
+          "epochs": 100,
+          "batch_size":16,
           "imgsz": 640,
+          "cache": false,
+          "optimizer": "auto",
+          "seed": 0,
+          "deterministic": true,
+          "single_cls": false,
+          "classes": null,
+          "rect": false,
+          "cos_lr": false,
+          "close_mosaic": 10,
+          "fraction": 1.0,
+          "lr0": 0.01,
+          "lrf": 0.01,
+          "weight_decay": 0.005,
+          "warmup_epochs": 3.0,
+          "box": 7.5,
+          "cls": 0.5,
+          "dfl": 1.5,
+          "overlap_mask": true,
           "conf_thres": 0.25,
-          "iou_thres": 0.45,
-          "max_det": 1000,
           "amp": false,
-          "freeze": 10
+          "freeze": 10,
+          "start_epoch": 0,
+          "patience": 100,
+          "botsort_configs": {
+            "track_high_thresh": 0.25,
+            "track_low_thresh": 0.1,
+            "new_track_thresh": 0.5,
+            "track_buffer": 30,
+            "match_thresh": 0.8,
+            "include_untracked": false
+          },
+          "yaml_config": {
+            "hsv_h": 0.05,
+            "hsv_s": 0.5,
+            "hsv_v": 0.6,
+            "degrees": 90.0,
+            "translate": 0.2,
+            "scale": 0.8,
+            "shear": 20.0,
+            "perspective": 0.0005,
+            "flipud": 0.3,
+            "fliplr": 0.7,
+            "bgr": 0.2,
+            "mosaic": 0.8,
+            "mixup": 0.3,
+            "copy_paste": 0.5,
+            "copy_paste_mode": "mixup",
+            "auto_augment": "augmix",
+            "erasing": 0.6,
+            "crop_fraction": 0.7
+          }
         },
         "inputType": "image",
         "outputType": "box",
-        "description": "Ultralytics YOLOv8 represents a modernized iteration, refining the successes of prior YOLO models. With added features and improvements, it aims to enhance both performance and versatility. YOLOv8 prioritizes speed, accuracy, and user-friendly design, making it a reliable option for tasks like object detection, tracking, instance segmentation, image classification, and pose estimation",
+        "description": "YOLOv11c is optimized for efficiency, operating with fewer parameters and less computational demand compared to its predecessors.",
         "labels": [
           "person",
           "bicycle",
@@ -273,25 +320,33 @@
         ]
       },
       {
-        "name": "yolov8l-Segmentation",
-        "moduleName": "yolov8-module",
+        "name": "yolov11-Segmentation",
+        "moduleName": "yolov11-module",
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
-          "weights_filename": "yolov8m-seg.pt",
+          "weights_filename": "yolov11c-seg.pt",
+          "weights_url": "https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov11c-seg.pt",
           "epochs": 10,
-          "batch_size": 2,
+          "batch_size": 4,
           "imgsz": 640,
           "conf_thres": 0.25,
           "iou_thres": 0.45,
           "max_det": 1000,
-          "augment": false,
-          "amp": false,
-          "freeze": 10
+          "botsort_configs": {
+            "track_high_thresh": 0.25,
+            "track_low_thresh": 0.1,
+            "new_track_thresh": 0.5,
+            "track_buffer": 30,
+            "match_thresh": 0.8,
+            "include_untracked": false,
+            "amp": false,
+            "freeze": 10
+          }
         },
         "inputType": "image",
-        "outputType": "segment",
-        "description": "Ultralytics YOLOv8 represents a modernized iteration, refining the successes of prior YOLO models. With added features and improvements, it aims to enhance both performance and versatility. YOLOv8 prioritizes speed, accuracy, and user-friendly design, making it a reliable option for tasks like object detection, tracking, instance segmentation, image classification, and pose estimation",
+        "outputType": "segmentation",
+        "description": "YOLOv11e is designed to be a larger model compared to YOLOv11c, with an emphasis on achieving higher accuracy.",
         "labels": [
           "person",
           "bicycle",
