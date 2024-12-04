@@ -128,17 +128,19 @@ class Adapter(dl.BaseModelAdapter):
             raise e
 
     def update_tracker_configs(self):
-        botsort_configs = self.configuration.get('botsort_configs', dict())
+        tracker_configs = self.configuration.get('tracker_configs', dict())
         # Load the YAML file
-        with open('botsort.yaml', 'r') as file:
+        yaml_file = 'botsort.yaml' if 'botsort' in tracker_configs.get("tracker_type", "bytetrack") else 'bytetrack.yaml'
+
+        with open(yaml_file, 'r') as file:
             data = yaml.safe_load(file)
 
         # Edit existing keys/values
-        data['track_high_thresh'] = botsort_configs.get('track_high_thresh', 0.25)
-        data['track_low_thresh'] = botsort_configs.get('track_low_thresh', 0.1)
-        data['new_track_thresh'] = botsort_configs.get('new_track_thresh', 0.5)
-        data['track_buffer'] = botsort_configs.get('track_buffer', 30)
-        data['match_thresh'] = botsort_configs.get('match_thresh', 0.8)
+        data['track_high_thresh'] = tracker_configs.get('track_high_thresh', 0.25)
+        data['track_low_thresh'] = tracker_configs.get('track_low_thresh', 0.1)
+        data['new_track_thresh'] = tracker_configs.get('new_track_thresh', 0.5)
+        data['track_buffer'] = tracker_configs.get('track_buffer', 30)
+        data['match_thresh'] = tracker_configs.get('match_thresh', 0.8)
 
         # Write the updated data back to a YAML file
         with open('custom_botsort.yaml', 'w') as file:
@@ -349,7 +351,7 @@ class Adapter(dl.BaseModelAdapter):
                                                       'model_id': self.model_entity.id,
                                                       'confidence': conf})
 
-    def create_video_annotation(self, res, annotation_collection, output_type, confidence_threshold, include_untracked):
+    def create_video_annotation(self, res, annotation_collection, confidence_threshold, include_untracked):
         track_ids = list(range(1000, 10001))
         for idx, frame in enumerate(res):
             for box in frame.boxes:
@@ -424,7 +426,7 @@ class Adapter(dl.BaseModelAdapter):
                         raise ValueError(f'Unsupported output type: {output_type}')
                 batch_annotations.append(image_annotations)
 
-            if 'video' in item.mimetype:  # TODO CHECK THAT
+            if 'video' in item.mimetype:
                 image_annotations = item.annotations.builder()
                 results = self.model.track(source=stream,
                                            tracker='custom_botsort.yaml',
@@ -442,7 +444,6 @@ class Adapter(dl.BaseModelAdapter):
                                            save_txt=False)
                 self.create_video_annotation(res=results,
                                              annotation_collection=image_annotations,
-                                             output_type=output_type,
                                              confidence_threshold=confidence_threshold,
                                              include_untracked=include_untracked)
                 batch_annotations.append(image_annotations)
@@ -452,103 +453,10 @@ class Adapter(dl.BaseModelAdapter):
 
 if __name__ == '__main__':
     import json
-    ##########
-    # BINARY #
-    ##########
 
-    # BINARY - SEGMENTATION ( output type binary)
-    # predict
     dl.setenv('rc')
-    model = dl.models.get(model_id='67447f0d1e5501718886f948')
-    model.configuration["weights_filename"] = "yolov9c-seg.pt"
-    model.update(True)
-    runner = Adapter(model_entity=model)
-    item1 = dl.items.get(item_id='674dc720991599368e266186')
-    runner.predict_items(items=[item1])
-    # train
-    model.dataset_id = "666a8eea63543373f98f178c"
-    model.dataset.metadata['system']['subsets'] = {
-        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-        'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
-    }
-    model.metadata['system'] = {}
-    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-                                           'validation': dl.Filters(field='dir', values='/val').prepare()}
-    model.update(True)
+    model = dl.models.get(None, "6750552e8ae0937fdf172a9c")
+    video_item = dl.items.get(None, "66a0d6d53e670a07accd997c")
 
-    runner.train_model(model)
-
-    # predict again
-    item2 = dl.items.get(item_id='666a90158be7693dc5f535f0')
-    runner.predict_items(items=[item2])
-
-    ########
-    # POLY #
-    ########
-
-    # POLY ( output type segment)
-    # predict
-    dl.setenv('rc')
-    model = dl.models.get(model_id='6746e0afecc656ce0d25a515')
-    model.configuration["weights_filename"] = "yolov9c-seg.pt"
-    model.update(True)
-    runner = Adapter(model_entity=model)
-    item1 = dl.items.get(item_id='6656f113eb4237fb401e2799')
-    runner.predict_items(items=[item1])
-
-    # train
-    model.dataset_id = "666a8eea63543373f98f178c"
-    model.id_to_label_map = {'0': 'cat', '1': 'dog'}
-    model.label_to_id_map = {0: 'cat', 1: 'dog'}
-    model.labels = ['cat', 'dog']
-    model.output_type = 'segment'
-    model.dataset.metadata['system']['subsets'] = {
-        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-        'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
-    }
-    model.metadata['system'] = {}
-    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-                                           'validation': dl.Filters(field='dir', values='/val').prepare()}
-    model.update(True)
-
-    runner.train_model(model)
-
-    # predict again
-
-    item1 = dl.items.get(item_id='6746e840c80dc17558dd8790')
-    runner.predict_items(items=[item1])
-
-    #######
-    # BOX #
-    #######
-
-    # predict
-    dl.setenv('prod')
-    model = dl.models.get(model_id='674dafef1062b3f1898de426')  # yolov9c-ukcNf
-    model.configuration["weights_filename"] = "yolov9c.pt"
-    model.update(True)
-    runner = Adapter(model_entity=model)
-    # item1 = dl.items.get(item_id='674d719c98f2f6ee0b4a3e1e')  # BUSES
-    # runner.predict_items(items=[item1])
-
-    # train
-    model.dataset_id = "674323d70497c573a3d2f64c"  # rodent-combined
-    model.id_to_label_map = {'0': 'Rodent'}
-    model.label_to_id_map = {0: 'Rodent'}
-    model.labels = ['Rodent']
-    model.output_type = 'box'
-    model.dataset.metadata['system']['subsets'] = {
-        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-        'validation': json.dumps(dl.Filters(field='dir', values='/validation').prepare()),
-    }
-    model.metadata['system'] = {}
-    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-                                           'validation': dl.Filters(field='dir', values='/validation').prepare()}
-    model.update(True)
-
-    runner.train_model(model)
-
-    #  predict again
-    item1 = dl.items.get(item_id='66d85aa478124a80402a290f')
-    item2 = dl.items.get(item_id='66d85aa3ccefbc46534a41b9')
-    runner.predict_items(items=[item1, item2])
+    runner = Adapter(model)
+    runner.predict_items([video_item])
