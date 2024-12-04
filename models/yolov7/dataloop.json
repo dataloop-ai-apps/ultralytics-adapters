@@ -40,7 +40,7 @@
         "runtime": {
           "podType": "gpu-t4",
           "concurrency": 1,
-          "runnerImage": "gcr.io/viewo-g/piper/agent/gpu/yolov7:0.0.1",
+          "runnerImage": "gcr.io/viewo-g/piper/agent/runner/apps/ultralytics-adapters:0.0.1",
           "autoscaler": {
             "type": "rabbitmq",
             "minReplicas": 0,
