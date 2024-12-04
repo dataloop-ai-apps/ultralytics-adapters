@@ -176,7 +176,7 @@
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
-          "weights_filename": "yolov11m.pt",
+          "weights_filename": "yolo11m.pt",
           "batch_size": 4,
           "train_configs": {
             "epochs": 100,
@@ -338,7 +338,7 @@
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
-          "weights_filename": "yolov11m-seg.pt",
+          "weights_filename": "yolo11m-seg.pt",
           "batch_size": 4,
           "train_configs": {
             "epochs": 100,
@@ -500,7 +500,7 @@
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
-          "weights_filename": "yolov11m-seg.pt",
+          "weights_filename": "yolo11m-seg.pt",
           "batch_size": 4,
           "train_configs": {
             "epochs": 100,
