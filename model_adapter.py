@@ -35,7 +35,7 @@ class Adapter(dl.BaseModelAdapter):
 
         else:
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
-            url = 'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename  # TODO modify for each model
+            url = 'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename
             model = YOLO(url)  # pass any model type
         model.to(device=self.device)
         logger.info(f"Model loaded successfully, Device: {self.device}")
@@ -189,31 +189,33 @@ class Adapter(dl.BaseModelAdapter):
 
     def train(self, data_path, output_path, **kwargs):
         # Training Parameters
-        epochs = self.configuration.get('epochs', 50)
-        batch_size = self.configuration.get('batch_size', 2)
-        imgsz = self.configuration.get('imgsz', 640)
-        cache = self.configuration.get('cache', False)
-        optimizer = self.configuration.get('optimizer', 'auto')
-        seed = self.configuration.get('seed', 0)
-        deterministic = self.configuration.get('deterministic', True)
-        single_cls = self.configuration.get('single_cls', False)
-        classes = self.configuration.get('classes', None)
-        rect = self.configuration.get('rect', False)
-        cos_lr = self.configuration.get('cos_lr', False)
-        close_mosaic = self.configuration.get('close_mosaic', 10)
-        fraction = self.configuration.get('fraction', 1.0)
-        lr0 = self.configuration.get('lr0', 0.01)
-        lrf = self.configuration.get('lrf', 0.01)
-        weight_decay = self.configuration.get('weight_decay', 0.005)
-        warmup_epochs = self.configuration.get('warmup_epochs', 3.0)
-        box = self.configuration.get('box', 7.5)
-        cls = self.configuration.get('cls', 0.5)
-        dfl = self.configuration.get('dfl', 1.5)
-        overlap_mask = self.configuration.get('overlap_mask', True)
-        amp = self.configuration.get('amp', False)
-        freeze = self.configuration.get('freeze', 10)
-        start_epoch = self.configuration.get('start_epoch', 0)
-        patience = self.configuration.get('patience', 100)
+        train_config = self.configuration.get('train_config', {})
+
+        epochs = train_config.get('epochs', 50)
+        batch_size = train_config.get('batch_size', 2)
+        imgsz = train_config.get('imgsz', 640)
+        cache = train_config.get('cache', False)
+        optimizer = train_config.get('optimizer', 'auto')
+        seed = train_config.get('seed', 0)
+        deterministic = train_config.get('deterministic', True)
+        single_cls = train_config.get('single_cls', False)
+        classes = train_config.get('classes', None)
+        rect = train_config.get('rect', False)
+        cos_lr = train_config.get('cos_lr', False)
+        close_mosaic = train_config.get('close_mosaic', 10)
+        fraction = train_config.get('fraction', 1.0)
+        lr0 = train_config.get('lr0', 0.01)
+        lrf = train_config.get('lrf', 0.01)
+        weight_decay = train_config.get('weight_decay', 0.005)
+        warmup_epochs = train_config.get('warmup_epochs', 3.0)
+        box = train_config.get('box', 7.5)
+        cls = train_config.get('cls', 0.5)
+        dfl = train_config.get('dfl', 1.5)
+        overlap_mask = train_config.get('overlap_mask', True)
+        amp = train_config.get('amp', False)
+        freeze = train_config.get('freeze', 10)
+        start_epoch = train_config.get('start_epoch', 0)
+        patience = train_config.get('patience', 100)
 
         resume = start_epoch > 0
         project_name = os.path.dirname(output_path)
@@ -347,59 +349,206 @@ class Adapter(dl.BaseModelAdapter):
                                                       'model_id': self.model_entity.id,
                                                       'confidence': conf})
 
+    def create_video_annotation(self, res, annotation_collection, output_type, confidence_threshold, include_untracked):
+        track_ids = list(range(1000, 10001))
+        for idx, frame in enumerate(res):
+            for box in frame.boxes:
+                if box.is_track is False:
+                    if include_untracked is False:
+                        continue
+                    else:
+                        # Guarantee unique object_id
+                        object_id = track_ids.pop()
+                        # object_id = random.randint(1000, 10000)
+                else:
+                    object_id = int(box.id.squeeze())
+                cls = int(box.cls.squeeze())
+                conf = float(box.conf.squeeze())
+                if conf < confidence_threshold:
+                    continue
+                label = self.model.names[cls]
+                xyxy = box.xyxy.squeeze()
+                annotation_collection.add(annotation_definition=dl.Box(left=float(xyxy[0]),
+                                                                       top=float(xyxy[1]),
+                                                                       right=float(xyxy[2]),
+                                                                       bottom=float(xyxy[3]),
+                                                                       label=label
+                                                                       ),
+                                          model_info={'name': self.model_entity.name,
+                                                      'model_id': self.model_entity.id,
+                                                      'confidence': conf},
+                                          object_id=object_id,
+                                          frame_num=idx
+                                          )
+
     def predict(self, batch, **kwargs):
-        confidence_threshold = self.configuration.get('conf_thres', 0.25)
         include_untracked = self.configuration.get('botsort_configs', dict()).get('include_untracked', False)
+        predict_config = self.configuration.get('predict_config', {})
+        confidence_threshold = predict_config.get('conf_thres', 0.25)
+        iou = predict_config.get('iou', 0.7)
+        half = predict_config.get('half', False)
+        max_det = predict_config.get('max_det', 300)
+        vid_stride = predict_config.get('vid_stride', 1)
+        augment = predict_config.get('augment', False)
+        agnostic_nms = predict_config.get('agnostic_nms', False)
+        imgsz = predict_config.get('classes', 640)
+        classes = predict_config.get('classes', None)
+
         batch_annotations = list()
         output_type = self.model_entity.output_type
         for stream, item in batch:
-            track_ids = list(range(1000, 10001))
             if 'image' in item.mimetype:
                 image_annotations = dl.AnnotationCollection()
-                results = self.model.predict(source=stream, save=False, save_txt=False)  # save predictions as labels
+                results = self.model.predict(source=stream,
+                                             iou=iou,
+                                             half=half,
+                                             max_det=max_det,
+                                             augment=augment,
+                                             agnostic_nms=agnostic_nms,
+                                             classes=classes,
+                                             imgsz=imgsz,
+                                             save=False,
+                                             save_txt=False)  # save predictions as labels
+
                 for i_img, res in enumerate(results):  # per image
                     if output_type == 'box':
-                        self.create_box_annotation(res, image_annotations, confidence_threshold)
+                        self.create_box_annotation(res=res,
+                                                   annotation_collection=image_annotations,
+                                                   confidence_threshold=confidence_threshold)
                     elif output_type == 'binary' or output_type == 'segment':  # SEGMENTATION
-                        self.create_segmentation_annotation(res, image_annotations, output_type, confidence_threshold)
+                        self.create_segmentation_annotation(res=res,
+                                                            annotation_collection=image_annotations,
+                                                            confidence_threshold=confidence_threshold,
+                                                            output_type=output_type)
                     else:
                         raise ValueError(f'Unsupported output type: {output_type}')
                 batch_annotations.append(image_annotations)
+
             if 'video' in item.mimetype:  # TODO CHECK THAT
                 image_annotations = item.annotations.builder()
                 results = self.model.track(source=stream,
                                            tracker='custom_botsort.yaml',
                                            stream=True,
                                            verbose=True,
+                                           iou=iou,
+                                           half=half,
+                                           max_det=max_det,
+                                           augment=augment,
+                                           agnostic_nms=agnostic_nms,
+                                           classes=classes,
+                                           vid_stride=vid_stride,
+                                           imgsz=imgsz,
                                            save=False,
                                            save_txt=False)
-                for idx, frame in enumerate(results):
-                    for box in frame.boxes:
-                        if box.is_track is False:
-                            if include_untracked is False:
-                                continue
-                            else:
-                                # Guarantee unique object_id
-                                object_id = track_ids.pop()
-                                # object_id = random.randint(1000, 10000)
-                        else:
-                            object_id = int(box.id.squeeze())
-                        cls = int(box.cls.squeeze())
-                        conf = float(box.conf.squeeze())
-                        label = self.model.names[cls]
-                        xyxy = box.xyxy.squeeze()
-                        image_annotations.add(annotation_definition=dl.Box(left=float(xyxy[0]),
-                                                                           top=float(xyxy[1]),
-                                                                           right=float(xyxy[2]),
-                                                                           bottom=float(xyxy[3]),
-                                                                           label=label
-                                                                           ),
-                                              model_info={'name': self.model_entity.name,
-                                                          'model_id': self.model_entity.id,
-                                                          'confidence': conf},
-                                              object_id=object_id,
-                                              frame_num=idx
-                                              )
+                self.create_video_annotation(res=results,
+                                             annotation_collection=image_annotations,
+                                             output_type=output_type,
+                                             confidence_threshold=confidence_threshold,
+                                             include_untracked=include_untracked)
                 batch_annotations.append(image_annotations)
 
         return batch_annotations
+
+
+if __name__ == '__main__':
+    import json
+    ##########
+    # BINARY #
+    ##########
+
+    # BINARY - SEGMENTATION ( output type binary)
+    # predict
+    dl.setenv('rc')
+    model = dl.models.get(model_id='67447f0d1e5501718886f948')
+    model.configuration["weights_filename"] = "yolov9c-seg.pt"
+    model.update(True)
+    runner = Adapter(model_entity=model)
+    item1 = dl.items.get(item_id='674dc720991599368e266186')
+    runner.predict_items(items=[item1])
+    # train
+    model.dataset_id = "666a8eea63543373f98f178c"
+    model.dataset.metadata['system']['subsets'] = {
+        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+        'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
+    }
+    model.metadata['system'] = {}
+    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+                                           'validation': dl.Filters(field='dir', values='/val').prepare()}
+    model.update(True)
+
+    runner.train_model(model)
+
+    # predict again
+    item2 = dl.items.get(item_id='666a90158be7693dc5f535f0')
+    runner.predict_items(items=[item2])
+
+    ########
+    # POLY #
+    ########
+
+    # POLY ( output type segment)
+    # predict
+    dl.setenv('rc')
+    model = dl.models.get(model_id='6746e0afecc656ce0d25a515')
+    model.configuration["weights_filename"] = "yolov9c-seg.pt"
+    model.update(True)
+    runner = Adapter(model_entity=model)
+    item1 = dl.items.get(item_id='6656f113eb4237fb401e2799')
+    runner.predict_items(items=[item1])
+
+    # train
+    model.dataset_id = "666a8eea63543373f98f178c"
+    model.id_to_label_map = {'0': 'cat', '1': 'dog'}
+    model.label_to_id_map = {0: 'cat', 1: 'dog'}
+    model.labels = ['cat', 'dog']
+    model.output_type = 'segment'
+    model.dataset.metadata['system']['subsets'] = {
+        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+        'validation': json.dumps(dl.Filters(field='dir', values='/val').prepare()),
+    }
+    model.metadata['system'] = {}
+    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+                                           'validation': dl.Filters(field='dir', values='/val').prepare()}
+    model.update(True)
+
+    runner.train_model(model)
+
+    # predict again
+
+    item1 = dl.items.get(item_id='6746e840c80dc17558dd8790')
+    runner.predict_items(items=[item1])
+
+    #######
+    # BOX #
+    #######
+
+    # predict
+    dl.setenv('prod')
+    model = dl.models.get(model_id='674dafef1062b3f1898de426')  # yolov9c-ukcNf
+    model.configuration["weights_filename"] = "yolov9c.pt"
+    model.update(True)
+    runner = Adapter(model_entity=model)
+    # item1 = dl.items.get(item_id='674d719c98f2f6ee0b4a3e1e')  # BUSES
+    # runner.predict_items(items=[item1])
+
+    # train
+    model.dataset_id = "674323d70497c573a3d2f64c"  # rodent-combined
+    model.id_to_label_map = {'0': 'Rodent'}
+    model.label_to_id_map = {0: 'Rodent'}
+    model.labels = ['Rodent']
+    model.output_type = 'box'
+    model.dataset.metadata['system']['subsets'] = {
+        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
+        'validation': json.dumps(dl.Filters(field='dir', values='/validation').prepare()),
+    }
+    model.metadata['system'] = {}
+    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
+                                           'validation': dl.Filters(field='dir', values='/validation').prepare()}
+    model.update(True)
+
+    runner.train_model(model)
+
+    #  predict again
+    item1 = dl.items.get(item_id='66d85aa478124a80402a290f')
+    item2 = dl.items.get(item_id='66d85aa3ccefbc46534a41b9')
+    runner.predict_items(items=[item1, item2])

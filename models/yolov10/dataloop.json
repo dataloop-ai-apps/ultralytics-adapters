@@ -1,9 +1,9 @@
 {
-  "name": "yolov7",
-  "displayName": "YOLOv7",
+  "name": "yolov10",
+  "displayName": "YOLOv10",
   "version": "0.0.1",
   "scope": "public",
-  "description": "YOLOv7 is a real-time object detection model optimized for efficiency and accuracy in tasks like detection and segmentation.",
+  "description": "YOLOv10 is a real-time object detection model that enhances efficiency and accuracy through innovations like Programmable Gradient Information (PGI) and the Generalized Efficient Layer Aggregation Network (GELAN). It supports various configurations such as YOLOv10c for efficiency and YOLOv10e for maximum accuracy .",
   "attributes": {
     "Provider": "Ultralytics",
     "License": "AGPL 3.0",
@@ -23,7 +23,7 @@
   "components": {
     "computeConfigs": [
       {
-        "name": "yolov7-deploy",
+        "name": "yolov10-deploy",
         "runtime": {
           "podType": "regular-xs",
           "concurrency": 1,
@@ -36,7 +36,7 @@
         }
       },
       {
-        "name": "yolov7-train-evaluate",
+        "name": "yolov10-train-evaluate",
         "runtime": {
           "podType": "gpu-t4",
           "concurrency": 1,
@@ -53,11 +53,11 @@
     ],
     "modules": [
       {
-        "name": "yolov7-module",
+        "name": "yolov10-module",
         "entryPoint": "model_adapter.py",
         "className": "Adapter",
-        "computeConfig": "yolov7-deploy",
-        "description": "Yolov7 Module",
+        "computeConfig": "yolov10-deploy",
+        "description": "Yolov10 Module",
         "initInputs": [
           {
             "type": "Model",
@@ -67,7 +67,7 @@
         "functions": [
           {
             "name": "evaluate_model",
-            "computeConfig": "yolov7-train-evaluate",
+            "computeConfig": "yolov10-train-evaluate",
             "input": [
               {
                 "type": "Model",
@@ -99,7 +99,7 @@
             ],
             "displayName": "Evaluate a Model",
             "displayIcon": "",
-            "description": "Function to evaluate YOLOv7 model performance"
+            "description": "Function to evaluate YOLOv10 model performance"
           },
           {
             "name": "predict_items",
@@ -124,7 +124,7 @@
             ],
             "displayName": "Predict Items",
             "displayIcon": "",
-            "description": "Function to run YOLOv7 inference on items"
+            "description": "Function to run YOLOv10 inference on items"
           },
           {
             "name": "predict_dataset",
@@ -143,11 +143,11 @@
             "output": [],
             "displayName": "Predict Dataset",
             "displayIcon": "",
-            "description": "Function to run YOLOv7 inference on a dataset."
+            "description": "Function to run YOLOv10 inference on a dataset."
           },
           {
             "name": "train_model",
-            "computeConfig": "yolov7-train-evaluate",
+            "computeConfig": "yolov10-train-evaluate",
             "input": [
               {
                 "type": "Model",
@@ -164,33 +164,78 @@
             ],
             "displayName": "Train a Model",
             "displayIcon": "",
-            "description": "Function to train YOLOv7 model"
+            "description": "Function to train YOLOv10 model"
           }
         ]
       }
     ],
     "models": [
       {
-        "name": "yolov7-Object-Detection",
-        "moduleName": "yolov7-seg-module",
+        "name": "yolov10-Object-Detection",
+        "moduleName": "yolov10-module",
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
-          "weights_filename": "yolov7.pt",
-          "checkpoint_url": "https://storage.googleapis.com/model-mgmt-snapshots/yolo-v7/yolov7-seg.pt",
-          "batch_size": 2,
-          "imgsz_w": 1280,
-          "imgsz_h": 1280,
+          "weights_filename": "yolov10c.pt",
+          "weights_url": "https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov10c.pt",
+          "epochs": 100,
+          "batch_size": 16,
+          "imgsz": 640,
+          "cache": false,
+          "optimizer": "auto",
+          "seed": 0,
+          "deterministic": true,
+          "single_cls": false,
+          "classes": null,
+          "rect": false,
+          "cos_lr": false,
+          "close_mosaic": 10,
+          "fraction": 1.0,
+          "lr0": 0.01,
+          "lrf": 0.01,
+          "weight_decay": 0.005,
+          "warmup_epochs": 3.0,
+          "box": 7.5,
+          "cls": 0.5,
+          "dfl": 1.5,
+          "overlap_mask": true,
           "conf_thres": 0.25,
-          "iou_thres": 0.45,
-          "max_det": 1000,
-          "augment": false,
           "amp": false,
-          "freeze": 10
+          "freeze": 10,
+          "start_epoch": 0,
+          "patience": 100,
+          "botsort_configs": {
+            "track_high_thresh": 0.25,
+            "track_low_thresh": 0.1,
+            "new_track_thresh": 0.5,
+            "track_buffer": 30,
+            "match_thresh": 0.8,
+            "include_untracked": false
+          },
+          "yaml_config": {
+            "hsv_h": 0.05,
+            "hsv_s": 0.5,
+            "hsv_v": 0.6,
+            "degrees": 100.0,
+            "translate": 0.2,
+            "scale": 0.8,
+            "shear": 20.0,
+            "perspective": 0.0005,
+            "flipud": 0.3,
+            "fliplr": 0.7,
+            "bgr": 0.2,
+            "mosaic": 0.8,
+            "mixup": 0.3,
+            "copy_paste": 0.5,
+            "copy_paste_mode": "mixup",
+            "auto_augment": "augmix",
+            "erasing": 0.6,
+            "crop_fraction": 0.7
+          }
         },
         "inputType": "image",
-        "outputType": "segment",
-        "description": "The YOLO v7 algorithm outperforms its predecessors in both speed and object detection accuracy. It requires significantly cheaper hardware compared to other neural networks. YOLO v7 features faster training times, even on smaller datasets, without the need for pre-trained weights.",
+        "outputType": "box",
+        "description": "YOLOv10c is optimized for efficiency, operating with fewer parameters and less computational demand compared to its predecessors.",
         "labels": [
           "person",
           "bicycle",
@@ -275,26 +320,71 @@
         ]
       },
       {
-        "name": "yolov7-Segmentation",
-        "moduleName": "yolov7-seg-module",
+        "name": "yolov10-Segmentation",
+        "moduleName": "yolov10-module",
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
-          "weights_filename": "yolov7-seg.pt",
-          "checkpoint_url": "https://storage.googleapis.com/model-mgmt-snapshots/yolo-v7/yolov7-seg.pt",
-          "batch_size": 2,
-          "imgsz_w": 1280,
-          "imgsz_h": 1280,
+          "weights_filename": "yolov10c-seg.pt",
+          "weights_url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov10c-seg.pt",
+          "epochs": 100,
+          "batch_size": 16,
+          "imgsz": 640,
+          "cache": false,
+          "optimizer": "auto",
+          "seed": 0,
+          "deterministic": true,
+          "single_cls": false,
+          "classes": null,
+          "rect": false,
+          "cos_lr": false,
+          "close_mosaic": 10,
+          "fraction": 1.0,
+          "lr0": 0.01,
+          "lrf": 0.01,
+          "weight_decay": 0.005,
+          "warmup_epochs": 3.0,
+          "box": 7.5,
+          "cls": 0.5,
+          "dfl": 1.5,
+          "overlap_mask": true,
           "conf_thres": 0.25,
-          "iou_thres": 0.45,
-          "max_det": 1000,
-          "augment": false,
           "amp": false,
-          "freeze": 10
+          "freeze": 10,
+          "start_epoch": 0,
+          "patience": 100,
+          "botsort_configs": {
+            "track_high_thresh": 0.25,
+            "track_low_thresh": 0.1,
+            "new_track_thresh": 0.5,
+            "track_buffer": 30,
+            "match_thresh": 0.8,
+            "include_untracked": false
+          },
+          "yaml_config": {
+            "hsv_h": 0.05,
+            "hsv_s": 0.5,
+            "hsv_v": 0.6,
+            "degrees": 100.0,
+            "translate": 0.2,
+            "scale": 0.8,
+            "shear": 20.0,
+            "perspective": 0.0005,
+            "flipud": 0.3,
+            "fliplr": 0.7,
+            "bgr": 0.2,
+            "mosaic": 0.8,
+            "mixup": 0.3,
+            "copy_paste": 0.5,
+            "copy_paste_mode": "mixup",
+            "auto_augment": "augmix",
+            "erasing": 0.6,
+            "crop_fraction": 0.7
+          }
         },
         "inputType": "image",
-        "outputType": "segment",
-        "description": "The YOLO v7 algorithm outperforms its predecessors in both speed and object detection accuracy. It requires significantly cheaper hardware compared to other neural networks. YOLO v7 features faster training times, even on smaller datasets, without the need for pre-trained weights.",
+        "outputType": "segmentation",
+        "description": "YOLOv10e is designed to be a larger model compared to YOLOv10c, with an emphasis on achieving higher accuracy.",
         "labels": [
           "person",
           "bicycle",
