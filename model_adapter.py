@@ -23,6 +23,7 @@ class Adapter(dl.BaseModelAdapter):
     def load(self, local_path, **kwargs):
         logger.info(f"ULTRALYTICS VERSION: {ultralytics.__version__}")
         model_filename = self.configuration.get('weights_filename', 'yolov9c.pt')
+        weights_url = self.configuration.get("weights_url")
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         model_filepath = os.path.normpath(os.path.join(local_path, model_filename))
         default_weights = os.path.join('/tmp/app/weights', model_filename)
@@ -34,7 +35,7 @@ class Adapter(dl.BaseModelAdapter):
 
         else:
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
-            url = 'https://github.com/ultralytics/assets/releases/download/v8.2.0/' + model_filename  # TODO modify for each model
+            url = 'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename  # TODO modify for each model
             model = YOLO(url)  # pass any model type
         model.to(device=self.device)
         logger.info(f"Model loaded successfully, Device: {self.device}")
@@ -402,36 +403,3 @@ class Adapter(dl.BaseModelAdapter):
                 batch_annotations.append(image_annotations)
 
         return batch_annotations
-
-
-if __name__ == '__main__':
-    import json
-
-    # IPM TESTS
-    dl.setenv('prod')
-    model = dl.models.get(model_id="674f07e7ce09970d36cd64d5")
-    runner = Adapter(model)
-
-    # train
-    model.dataset_id = "674323d70497c573a3d2f64c"  # rodent-combined
-    model.id_to_label_map = {'0': 'Rodent'}
-    model.label_to_id_map = {0: 'Rodent'}
-    model.labels = ['Rodent']
-    model.output_type = 'box'
-    model.dataset.metadata['system']['subsets'] = {
-        'train': json.dumps(dl.Filters(field='dir', values='/train').prepare()),
-        'validation': json.dumps(dl.Filters(field='dir', values='/validation').prepare()),
-    }
-    model.metadata['system'] = {}
-    model.metadata['system']['subsets'] = {'train': dl.Filters(field='dir', values='/train').prepare(),
-                                           'validation': dl.Filters(field='dir', values='/validation').prepare()}
-    model.update(True)
-
-    runner.train_model(model)
-
-    # TEST
-    # item1 = dl.items.get(item_id='674ecaf28bf794ed2938dc61')
-    # item2 = dl.items.get(item_id='674ecaf28bf794e71b38dc63')
-    # item3 = dl.items.get(item_id='674ecaf28bf7947c2938dc62')
-    # item4 = dl.items.get(item_id='674ecaf28bf79435ca38dc60')
-    # runner.predict_items(items=[item1, item2, item3, item4])

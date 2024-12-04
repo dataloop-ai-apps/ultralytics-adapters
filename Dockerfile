@@ -6,8 +6,12 @@ USER root
 RUN mkdir -p /tmp/app && chown 1000:1000 /tmp/app
 RUN mkdir -p /tmp/app/weights && chown 1000:1000 /tmp/app/weights
 
-RUN wget -O /tmp/app/weights/yolov9c-seg.pt https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov9c-seg.pt
-RUN wget -O /tmp/app/weights/yolov9c.pt https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov9c.pt
+RUN wget -O /tmp/app/weights/yolov9c-seg.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov11m-seg.pt
+RUN wget -O /tmp/app/weights/yolov9c.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov11m.pt
+RUN wget -O /tmp/app/weights/yolov9c-seg.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov9c-seg.pt
+RUN wget -O /tmp/app/weights/yolov9c.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov9c.pt
+RUN wget -O /tmp/app/weights/yolov9c-seg.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8m-seg.pt
+RUN wget -O /tmp/app/weights/yolov9c.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8m.pt
 
 RUN pip install --user \
     ultralytics \
