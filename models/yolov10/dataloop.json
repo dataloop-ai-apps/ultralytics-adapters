@@ -3,7 +3,7 @@
   "displayName": "YOLOv10",
   "version": "0.0.1",
   "scope": "public",
-  "description": "YOLOv10 is a real-time object detection model that enhances efficiency and accuracy through innovations like Programmable Gradient Information (PGI) and the Generalized Efficient Layer Aggregation Network (GELAN). It supports various configurations such as YOLOv10c for efficiency and YOLOv10e for maximum accuracy .",
+  "description": "A projected version in the YOLO series designed to enhance multi-task learning and detection capabilities with incremental architectural updates.",
   "attributes": {
     "Provider": "Ultralytics",
     "License": "AGPL 3.0",
@@ -248,7 +248,7 @@
         },
         "inputType": "image",
         "outputType": "box",
-        "description": "YOLOv10c is optimized for efficiency, operating with fewer parameters and less computational demand compared to its predecessors.",
+        "description": "Ultralytics YOLOv10 for Object Detection and Tracking tasks.",
         "labels": [
           "person",
           "bicycle",

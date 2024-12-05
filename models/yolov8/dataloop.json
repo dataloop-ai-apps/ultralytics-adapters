@@ -3,7 +3,7 @@
   "displayName": "YOLOv8",
   "version": "0.0.1",
   "scope": "public",
-  "description": "YOLOv8 is a real-time object detection model designed for tasks like detection, segmentation, and classification, offering high speed and accuracy.",
+  "description": "An object detection model by Ultralytics that builds on previous YOLO architectures, offering improved speed, accuracy, and ease of deployment for real-time applications.",
   "attributes": {
     "Provider": "Ultralytics",
     "License": "AGPL 3.0",
@@ -248,7 +248,7 @@
         },
         "inputType": "image",
         "outputType": "box",
-        "description": "Ultralytics YOLOv8 represents a modernized iteration, refining the successes of prior YOLO models. With added features and improvements, it aims to enhance both performance and versatility. YOLOv8 prioritizes speed, accuracy, and user-friendly design, making it a reliable option for tasks like object detection, tracking, instance segmentation, image classification, and pose estimation",
+        "description": "Ultralytics YOLOv8 for Object Detection and Tracking tasks.",
         "labels": [
           "person",
           "bicycle",
@@ -410,7 +410,7 @@
         },
         "inputType": "image",
         "outputType": "segment",
-        "description": "Ultralytics YOLOv8 represents a modernized iteration, refining the successes of prior YOLO models. With added features and improvements, it aims to enhance both performance and versatility. YOLOv8 prioritizes speed, accuracy, and user-friendly design, making it a reliable option for tasks like object detection, tracking, instance segmentation, image classification, and pose estimation",
+        "description": "Ultralytics YOLOv8 for Segmentation and Tracking tasks.",
         "labels": [
           "person",
           "bicycle",
@@ -572,7 +572,7 @@
         },
         "inputType": "image",
         "outputType": "binary",
-        "description": "Ultralytics YOLOv8 represents a modernized iteration, refining the successes of prior YOLO models. With added features and improvements, it aims to enhance both performance and versatility. YOLOv8 prioritizes speed, accuracy, and user-friendly design, making it a reliable option for tasks like object detection, tracking, instance segmentation, image classification, and pose estimation",
+        "description": "Ultralytics YOLOv8 for Segmentation and Tracking tasks.",
         "labels": [
           "person",
           "bicycle",
