@@ -197,7 +197,7 @@ class Adapter(dl.BaseModelAdapter):
     def train(self, data_path, output_path, **kwargs):
         # Training Parameters
         # https://docs.ultralytics.com/usage/cfg/#train-settings
-        train_config = self.configuration.get('train_config', {})
+        train_config = self.configuration.get('train_configs', {})
 
         epochs = train_config.get('epochs', 50)
         batch_size = train_config.get('batch_size', 2)
@@ -230,7 +230,7 @@ class Adapter(dl.BaseModelAdapter):
         name = os.path.basename(output_path)
 
         # https://docs.ultralytics.com/modes/train/#augmentation-settings-and-hyperparameters
-        yaml_config = self.configuration.get('yaml_config', dict())
+        yaml_config = self.configuration.get('yaml_configs', dict())
 
         params = {'path': os.path.realpath(data_path),  # must be full path otherwise the train adds "datasets" to it
                   'train': 'train',
@@ -391,8 +391,8 @@ class Adapter(dl.BaseModelAdapter):
 
     def predict(self, batch, **kwargs):
         # https://docs.ultralytics.com/modes/predict/#inference-arguments
-        include_untracked = self.configuration.get('botsort_configs', dict()).get('include_untracked', False)
-        predict_config = self.configuration.get('predict_config', {})
+        include_untracked = self.configuration.get('tracker_configs', dict()).get('include_untracked', False)
+        predict_config = self.configuration.get('predict_configs', {})
         confidence_threshold = predict_config.get('conf_thres', 0.25)
         iou = predict_config.get('iou', 0.7)
         half = predict_config.get('half', False)
