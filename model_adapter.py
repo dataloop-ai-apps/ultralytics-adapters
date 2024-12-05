@@ -35,6 +35,7 @@ class Adapter(dl.BaseModelAdapter):
             model = YOLO(default_weights)
             logger.info(f"Loaded default weights from local path: {default_weights}")
         else:
+            # https://github.com/ultralytics/assets/releases/tag/v8.3.0/
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
             url = 'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename
             model = YOLO(url)  # pass any model type
@@ -195,6 +196,7 @@ class Adapter(dl.BaseModelAdapter):
 
     def train(self, data_path, output_path, **kwargs):
         # Training Parameters
+        # https://docs.ultralytics.com/usage/cfg/#train-settings
         train_config = self.configuration.get('train_config', {})
 
         epochs = train_config.get('epochs', 50)
@@ -388,6 +390,7 @@ class Adapter(dl.BaseModelAdapter):
                                           )
 
     def predict(self, batch, **kwargs):
+        # https://docs.ultralytics.com/modes/predict/#inference-arguments
         include_untracked = self.configuration.get('botsort_configs', dict()).get('include_untracked', False)
         predict_config = self.configuration.get('predict_config', {})
         confidence_threshold = predict_config.get('conf_thres', 0.25)
@@ -431,6 +434,7 @@ class Adapter(dl.BaseModelAdapter):
                 batch_annotations.append(image_annotations)
 
             if 'video' in item.mimetype:
+                # https://docs.ultralytics.com/modes/track/#real-world-applications
                 image_annotations = item.annotations.builder()
                 results = self.model.track(source=stream,
                                            tracker='custom_botsort.yaml',

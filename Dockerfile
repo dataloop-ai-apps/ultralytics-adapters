@@ -2,6 +2,8 @@ FROM dataloopai/dtlpy-agent:gpu.cuda.11.8.py3.8.pytorch2
 
 USER root
 
+RUN apt-get update && apt-get install -y curl
+
 # Create directory and set ownership in one step
 RUN mkdir -p /tmp/app && chown 1000:1000 /tmp/app
 RUN mkdir -p /tmp/app/weights && chown 1000:1000 /tmp/app/weights
