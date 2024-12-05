@@ -23,20 +23,23 @@ class Adapter(dl.BaseModelAdapter):
     def load(self, local_path, **kwargs):
         logger.info(f"ULTRALYTICS VERSION: {ultralytics.__version__}")
         model_filename = self.configuration.get('weights_filename', 'yolov9c.pt')
-        weights_url = self.configuration.get("weights_url")
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+        logger.info(f"Device: {self.device}")
         model_filepath = os.path.normpath(os.path.join(local_path, model_filename))
         default_weights = os.path.join('/tmp/app/weights', model_filename)
 
         if os.path.isfile(model_filepath):
             model = YOLO(model_filepath)
+            logger.info(f"Loaded trained weights: {model_filepath}")
         elif os.path.isfile(default_weights):
             model = YOLO(default_weights)
-
+            logger.info(f"Loaded default weights from local path: {default_weights}")
         else:
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
             url = 'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename
             model = YOLO(url)  # pass any model type
+            logger.info(f"Loaded default weights from url: {url}")
+
         model.to(device=self.device)
         logger.info(f"Model loaded successfully, Device: {self.device}")
 
@@ -130,7 +133,8 @@ class Adapter(dl.BaseModelAdapter):
     def update_tracker_configs(self):
         tracker_configs = self.configuration.get('tracker_configs', dict())
         # Load the YAML file
-        yaml_file = 'botsort.yaml' if 'botsort' in tracker_configs.get("tracker_type", "bytetrack") else 'bytetrack.yaml'
+        yaml_file = 'botsort.yaml' if 'botsort' in tracker_configs.get("tracker_type",
+                                                                       "bytetrack") else 'bytetrack.yaml'
 
         with open(yaml_file, 'r') as file:
             data = yaml.safe_load(file)
@@ -449,14 +453,3 @@ class Adapter(dl.BaseModelAdapter):
                 batch_annotations.append(image_annotations)
 
         return batch_annotations
-
-
-if __name__ == '__main__':
-    import json
-
-    dl.setenv('rc')
-    model = dl.models.get(None, "6750552e8ae0937fdf172a9c")
-    video_item = dl.items.get(None, "66a0d6d53e670a07accd997c")
-
-    runner = Adapter(model)
-    runner.predict_items([video_item])
