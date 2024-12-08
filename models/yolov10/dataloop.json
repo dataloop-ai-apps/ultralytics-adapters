@@ -27,6 +27,7 @@
         "runtime": {
           "podType": "regular-xs",
           "concurrency": 1,
+          "runnerImage": "gcr.io/viewo-g/piper/agent/runner/apps/ultralytics-adapters:0.0.4",
           "autoscaler": {
             "type": "rabbitmq",
             "minReplicas": 0,
