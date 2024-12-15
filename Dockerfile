@@ -11,8 +11,8 @@ RUN mkdir -p /tmp/app/weights && chown 1000:1000 /tmp/app/weights
 USER 1000
 
 # Download weights
-RUN wget -O /tmp/app/weights/yolov11m-seg.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m-seg.pt
-RUN wget -O /tmp/app/weights/yolov11m.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt
+RUN wget -O /tmp/app/weights/yolo11m-seg.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m-seg.pt
+RUN wget -O /tmp/app/weights/yolo11m.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt
 RUN wget -O /tmp/app/weights/yolov10m.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov10m.pt
 RUN wget -O /tmp/app/weights/yolov9c-seg.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov9c-seg.pt
 RUN wget -O /tmp/app/weights/yolov9c.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov9c.pt

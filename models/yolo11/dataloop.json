@@ -1,6 +1,6 @@
 {
-  "name": "yolov11-ultralytics",
-  "displayName": "YOLOv11",
+  "name": "yolo11-ultralytics",
+  "displayName": "YOLO11",
   "version": "0.0.1",
   "scope": "public",
   "description": "An anticipated model in the YOLO framework aimed at addressing complex detection challenges with optimized scalability and improved computational efficiency.",
@@ -23,7 +23,7 @@
   "components": {
     "computeConfigs": [
       {
-        "name": "yolov11-deploy",
+        "name": "yolo11-deploy",
         "runtime": {
           "podType": "regular-xs",
           "concurrency": 1,
@@ -37,7 +37,7 @@
         }
       },
       {
-        "name": "yolov11-train-evaluate",
+        "name": "yolo11-train-evaluate",
         "runtime": {
           "podType": "gpu-t4",
           "concurrency": 1,
@@ -54,11 +54,11 @@
     ],
     "modules": [
       {
-        "name": "yolov11-module",
+        "name": "yolo11-module",
         "entryPoint": "model_adapter.py",
         "className": "Adapter",
-        "computeConfig": "yolov11-deploy",
-        "description": "Yolov11 Module",
+        "computeConfig": "yolo11-deploy",
+        "description": "yolo11 Module",
         "initInputs": [
           {
             "type": "Model",
@@ -68,7 +68,7 @@
         "functions": [
           {
             "name": "evaluate_model",
-            "computeConfig": "yolov11-train-evaluate",
+            "computeConfig": "yolo11-train-evaluate",
             "input": [
               {
                 "type": "Model",
@@ -100,7 +100,7 @@
             ],
             "displayName": "Evaluate a Model",
             "displayIcon": "",
-            "description": "Function to evaluate YOLOv11 model performance"
+            "description": "Function to evaluate YOLO11 model performance"
           },
           {
             "name": "predict_items",
@@ -125,7 +125,7 @@
             ],
             "displayName": "Predict Items",
             "displayIcon": "",
-            "description": "Function to run YOLOv11 inference on items"
+            "description": "Function to run YOLO11 inference on items"
           },
           {
             "name": "predict_dataset",
@@ -144,11 +144,11 @@
             "output": [],
             "displayName": "Predict Dataset",
             "displayIcon": "",
-            "description": "Function to run YOLOv11 inference on a dataset."
+            "description": "Function to run YOLO11 inference on a dataset."
           },
           {
             "name": "train_model",
-            "computeConfig": "yolov11-train-evaluate",
+            "computeConfig": "yolo11-train-evaluate",
             "input": [
               {
                 "type": "Model",
@@ -165,20 +165,21 @@
             ],
             "displayName": "Train a Model",
             "displayIcon": "",
-            "description": "Function to train YOLOv11 model"
+            "description": "Function to train YOLO11 model"
           }
         ]
       }
     ],
     "models": [
       {
-        "name": "yolov11-Object-Detection",
-        "moduleName": "yolov11-module",
+        "name": "yolo11-Object-Detection",
+        "moduleName": "yolo11-module",
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
           "weights_filename": "yolo11m.pt",
           "batch_size": 4,
+          "model_url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt",
           "train_configs": {
             "epochs": 100,
             "batch_size": 16,
@@ -226,7 +227,7 @@
             "match_thresh": 0.8,
             "include_untracked": false
           },
-          "yaml_configs": {
+          "augmentation_configs": {
             "hsv_h": 0.015,
             "hsv_s": 0.7,
             "hsv_v": 0.4,
@@ -249,7 +250,7 @@
         },
         "inputType": "image",
         "outputType": "box",
-        "description": "Ultralytics YOLOv11 for Object Detection and Tracking tasks.",
+        "description": "Ultralytics YOLO11 for Object Detection and Tracking tasks.",
         "labels": [
           "person",
           "bicycle",
@@ -334,13 +335,14 @@
         ]
       },
       {
-        "name": "yolov11-Segmentation",
-        "moduleName": "yolov11-module",
+        "name": "yolo11-Segmentation",
+        "moduleName": "yolo11-module",
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
           "weights_filename": "yolo11m-seg.pt",
           "batch_size": 4,
+          "model_url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m-seg.pt",
           "train_configs": {
             "epochs": 100,
             "batch_size": 16,
@@ -388,7 +390,7 @@
             "match_thresh": 0.8,
             "include_untracked": false
           },
-          "yaml_configs": {
+          "augmentation_configs": {
             "hsv_h": 0.015,
             "hsv_s": 0.7,
             "hsv_v": 0.4,
@@ -411,7 +413,7 @@
         },
         "inputType": "image",
         "outputType": "segment",
-        "description": "Ultralytics YOLOv11 for Segmentation and Tracking Tasks.",
+        "description": "Ultralytics YOLO11 for Segmentation and Tracking Tasks.",
         "labels": [
           "person",
           "bicycle",
@@ -496,13 +498,14 @@
         ]
       },
       {
-        "name": "yolov11-MaskSegmentation",
-        "moduleName": "yolov11-module",
+        "name": "yolo11-MaskSegmentation",
+        "moduleName": "yolo11-module",
         "scope": "project",
         "status": "pre-trained",
         "configuration": {
           "weights_filename": "yolo11m-seg.pt",
           "batch_size": 4,
+          "model_url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m-seg.pt",
           "train_configs": {
             "epochs": 100,
             "batch_size": 16,
@@ -550,7 +553,7 @@
             "match_thresh": 0.8,
             "include_untracked": false
           },
-          "yaml_configs": {
+          "augmentation_configs": {
             "hsv_h": 0.015,
             "hsv_s": 0.7,
             "hsv_v": 0.4,
@@ -573,7 +576,7 @@
         },
         "inputType": "image",
         "outputType": "binary",
-        "description": "Ultralytics YOLOv11 for Segmentation and Tracking Tasks.",
+        "description": "Ultralytics YOLO11 for Segmentation and Tracking Tasks.",
         "labels": [
           "person",
           "bicycle",

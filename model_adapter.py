@@ -37,7 +37,8 @@ class Adapter(dl.BaseModelAdapter):
         else:
             # https://github.com/ultralytics/assets/releases/tag/v8.3.0/
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
-            url = 'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename
+            url = self.configuration.get("model_url",
+                                         'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename)
             model = YOLO(url)  # pass any model type
             logger.info(f"Loaded default weights from url: {url}")
 
@@ -134,8 +135,7 @@ class Adapter(dl.BaseModelAdapter):
     def update_tracker_configs(self):
         tracker_configs = self.configuration.get('tracker_configs', dict())
         # Load the YAML file
-        yaml_file = 'botsort.yaml' if 'botsort' in tracker_configs.get("tracker_type",
-                                                                       "bytetrack") else 'bytetrack.yaml'
+        yaml_file = tracker_configs.get("tracker_type", "botsort") + ".yaml"
 
         with open(yaml_file, 'r') as file:
             data = yaml.safe_load(file)
@@ -230,7 +230,7 @@ class Adapter(dl.BaseModelAdapter):
         name = os.path.basename(output_path)
 
         # https://docs.ultralytics.com/modes/train/#augmentation-settings-and-hyperparameters
-        yaml_config = self.configuration.get('yaml_configs', dict())
+        yaml_config = self.configuration.get('augmentation_configs', dict())
 
         params = {'path': os.path.realpath(data_path),  # must be full path otherwise the train adds "datasets" to it
                   'train': 'train',
