@@ -4,6 +4,7 @@ import numpy as np
 import unittest
 import random
 import dotenv
+import shutil
 import torch
 import json
 import os
@@ -110,23 +111,45 @@ class MyTestCase(unittest.TestCase):
 
         return app, model_name
 
-    def perdict_model_platform(self, model_folder_name: str):
+    def _perdict_model_remotely(self, model_folder_name: str):
         # Upload item
-        item = self.prepare_item_function(model_folder_name=model_folder_name)
+        item_name = 'pretrained_predict.png'
+        item = self.prepare_item_function(model_folder_name=model_folder_name, item_name=item_name)
 
         # Get model and predict
-        app, model_name = self.create_model_entity(model_folder_name=model_folder_name)
-        model = app.project.models.get(model_name=model_name)
-        service = model.deploy()
+        model_path = os.path.join(self.models_path, model_folder_name)
+        dataloop_json_filepath = os.path.join(model_path, 'dataloop.json')
+        with open(dataloop_json_filepath, 'r') as f:
+            dataloop_json = json.load(f)
+        dataloop_json.pop('codebase')
+        dataloop_json["scope"] = "project"
+        dataloop_json["name"] = f'{dataloop_json["name"]}-{self.project.id}'
+        model_name = dataloop_json.get('components', dict()).get('models', list())[0].get("name", None)
 
-        model.metadata["system"]["deploy"] = {"services": [service.id]}
-        execution = model.predict(item_ids=[item.id])
-        execution = execution.wait()
+        # Publish dpk and install app
+        dpk = dl.Dpk.from_json(_json=dataloop_json, client_api=dl.client_api, project=self.project)
+        shutil.copy('model_adapter.py', os.path.join(model_path, 'model_adapter.py'))
+        os.chdir(model_path)
+        dpk = self.project.dpks.publish(dpk=dpk)
+        app = self.project.apps.install(dpk=dpk)
 
-        # Execution output format:
-        # [[{"item_id": item_id}, ...], [{"annotation_id": annotation_id}, ...]]
-        _, annotations = execution.output
-        return annotations
+        models = app.project.models.list().items
+        annotations_list = list()
+        for model in models:
+            service = model.deploy()
+
+            model.metadata["system"]["deploy"] = {"services": [service.id]}
+            execution = model.predict(item_ids=[item.id])
+            execution = execution.wait()
+
+            # Execution output format:
+            # [[{"item_id": item_id}, ...], [{"annotation_id": annotation_id}, ...]]
+            _, annotations = execution.output
+            annotations_list.append(annotations)
+
+        os.remove(os.path.join(model_path, 'model_adapter.py'))
+
+        return annotations_list
 
     def _predict_pretrained_model_locally(self, model_folder_name: str):
         item_name = 'pretrained_predict.png'
@@ -203,6 +226,10 @@ class MyTestCase(unittest.TestCase):
     def test_predict_pretrained_model_locally(self):
         for dir in os.listdir(self.models_path):
             self._predict_pretrained_model_locally(model_folder_name=dir)
+
+    def test_predict_pretrained_model_remotely(self):
+        for dir in os.listdir(self.models_path):
+            self._perdict_model_remotely(model_folder_name=dir)
 
     def test_train_model_locally(self):
         for dir in os.listdir(self.models_path):
