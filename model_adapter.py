@@ -400,7 +400,7 @@ class Adapter(dl.BaseModelAdapter):
         vid_stride = predict_config.get('vid_stride', 1)
         augment = predict_config.get('augment', False)
         agnostic_nms = predict_config.get('agnostic_nms', False)
-        imgsz = predict_config.get('classes', 640)
+        imgsz = predict_config.get('imgsz', 640)
         classes = predict_config.get('classes', None)
 
         batch_annotations = list()

@@ -16,6 +16,7 @@ efficiently manage datasets, annotations, and the full lifecycle of YOLO models 
 ## Requirements
 
 - dtlpy
+- dtlpy-converters
 - ultralytics
 - pyyaml
 - An account in the [Dataloop platform](https://console.dataloop.ai/)
@@ -45,12 +46,26 @@ Training options and explanation can be found
 here: [Ultralytics Configuration documentation](https://docs.ultralytics.com/usage/cfg/#train).
 The basic configuration is by the default train values. Edit by your needs.
 
-- `yaml_config`: Dictionary to pass for the training yml config - used for `Augmentation Parameters`.
+- `augmentation_config`: Dictionary to pass for the training yml config - used for `Augmentation Parameters`.
 
 ## Sources and Further Reading
 
 - [Ultralytics Models documentation](https://docs.ultralytics.com/models/)
 
-## Acknowledgements
+
+### Attribution
+
+These apps provide adapters for integrating the YOLO models available in
+the [Ultralytics](https://github.com/ultralytics/ultralytics) repository. It simplifies the process of using the
+state-of-the-art YOLO (You Only Look Once) object detection and image segmentation models provided by Ultralytics,
+making it easier to incorporate them into various applications and workflows.
+
+The Ultralytics repository is licensed under
+the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://github.com/ultralytics/ultralytics/blob/main/LICENSE).
+As this adapter builds on and integrates with the Ultralytics models, its use must comply with the terms of the AGPL-3.0
+license.
+
+Special thanks to the Ultralytics team for developing and maintaining such a powerful framework for AI vision tasks. For
+more information, visit the [Ultralytics GitHub repository](https://github.com/ultralytics/ultralytics).
 
 

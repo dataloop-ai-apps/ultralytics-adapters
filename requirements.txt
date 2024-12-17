@@ -1,3 +1,6 @@
 ultralytics
 dtlpy
 pyyaml
+torch
+numpy
+python-dotenv

@@ -19,3 +19,4 @@ node_modules
 custom_botsort.yaml
 /v9-test
 /runs
+*.env
