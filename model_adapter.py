@@ -148,7 +148,7 @@ class Adapter(dl.BaseModelAdapter):
         data['match_thresh'] = tracker_configs.get('match_thresh', 0.8)
 
         # Write the updated data back to a YAML file
-        with open('custom_botsort.yaml', 'w') as file:
+        with open('custom_tracker.yaml', 'w') as file:
             yaml.safe_dump(data, file, default_flow_style=False)
 
     def prepare_item_func(self, item):
@@ -279,10 +279,11 @@ class Adapter(dl.BaseModelAdapter):
                                              legend=legend,
                                              x=self.current_epoch,
                                              y=value))
-            self.model_entity.metrics.create(samples=samples, dataset_id=self.model_entity.dataset_id)
+            self.model_entity.metrics.create(samples=samples,
+                                             dataset_id=self.model_entity.dataset_id)  # TODO: comment for unittest
             # save model output after each epoch end
             self.configuration['start_epoch'] = self.current_epoch + 1
-            self.save_to_model(local_path=output_path, cleanup=False)
+            self.save_to_model(local_path=output_path, cleanup=False)  # TODO: comment for unittest
 
         self.model.add_callback(event='on_fit_epoch_end', func=on_epoch_end)
         self.model.train(
@@ -437,7 +438,7 @@ class Adapter(dl.BaseModelAdapter):
                 # https://docs.ultralytics.com/modes/track/#real-world-applications
                 image_annotations = item.annotations.builder()
                 results = self.model.track(source=stream,
-                                           tracker='custom_botsort.yaml',
+                                           tracker='custom_tracker.yaml',
                                            stream=True,
                                            verbose=True,
                                            iou=iou,

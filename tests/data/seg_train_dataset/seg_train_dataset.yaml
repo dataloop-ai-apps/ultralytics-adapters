@@ -1,0 +1,3 @@
+path: C:\Users\Roni\Desktop\Projects\ultralytics-adapters\tests\data\seg_train_dataset
+train: train
+val: validation

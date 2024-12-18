@@ -17,6 +17,9 @@ node_modules
 /YOLOv9
 /weights
 custom_botsort.yaml
+custom_tracker.yaml
 /v9-test
 /runs
 *.env
+**/outputs/
+*.cache
