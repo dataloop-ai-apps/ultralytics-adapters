@@ -279,11 +279,11 @@ class Adapter(dl.BaseModelAdapter):
                                              legend=legend,
                                              x=self.current_epoch,
                                              y=value))
-            self.model_entity.metrics.create(samples=samples,
-                                             dataset_id=self.model_entity.dataset_id)  # TODO: comment for unittest
+            # self.model_entity.metrics.create(samples=samples,
+            #                                  dataset_id=self.model_entity.dataset_id)  # TODO: comment for unittest
             # save model output after each epoch end
             self.configuration['start_epoch'] = self.current_epoch + 1
-            self.save_to_model(local_path=output_path, cleanup=False)  # TODO: comment for unittest
+            # self.save_to_model(local_path=output_path, cleanup=False)  # TODO: comment for unittest
 
         self.model.add_callback(event='on_fit_epoch_end', func=on_epoch_end)
         self.model.train(

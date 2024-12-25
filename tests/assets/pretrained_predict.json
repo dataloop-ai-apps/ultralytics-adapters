@@ -1,0 +1,22 @@
+{
+  "dir": "/",
+  "filename": "/pretrained_predict.png",
+  "type": "file",
+  "metadata": {
+    "system": {
+      "channels": 4,
+      "encoding": "7bit",
+      "height": 731,
+      "isBinary": true,
+      "mimetype": "image/png",
+      "originalname": "pretrained_predict.png",
+      "refs": [],
+      "size": 1544036,
+      "taskStatusLog": [],
+      "width": 1024
+    }
+  },
+  "name": "pretrained_predict.png",
+  "annotationsCount": 3,
+  "annotated": true
+}

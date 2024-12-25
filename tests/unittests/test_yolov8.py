@@ -1,64 +1,76 @@
+import uuid
+
+from skimage.metrics import structural_similarity as ssim
 from model_adapter import Adapter
+from io import BytesIO
 from PIL import Image
+import dtlpymetrics
 import dtlpy as dl
 import unittest
+import base64
 import json
 import yaml
+import cv2
 import os
 
 
 class TestModelAdapter(unittest.TestCase):
     @staticmethod
-    def prepare_item(image_name):
-        # Simulating an item with a local URL
-        _json = {
-            "dir": "/",
-            "filename": f"/{image_name}",
-            "type": "file",
-            "metadata": {
-                "system": {
-                    "channels": 4,
-                    "encoding": "7bit",
-                    "height": 731,
-                    "isBinary": True,
-                    "mimetype": "image/png",
-                    "originalname": image_name,
-                    "refs": [],
-                    "size": 1544036,
-                    "taskStatusLog": [],
-                    "width": 1024
-                }
-            },
-            "name": image_name
-        }
+    def get_project_root():
+        """
+        Get the project root directory dynamically, regardless of the current working directory.
+        """
+        current_dir = os.getcwd()  # Get the current working directory
+        # Check if the current directory is within the 'tests/unittests' folder
+        if current_dir.endswith(os.path.join("tests", "unittests")):
+            # Go up two levels to get to the project root
+            return os.path.abspath(os.path.join(current_dir, "..", ".."))
+        else:
+            # Assume the current working directory is already the project root
+            return current_dir
+
+    @staticmethod
+    def prepare_item(local_item_name):
+        project_root = TestModelAdapter.get_project_root()
+        assets_path = os.path.join(project_root, "tests", "assets")
+
+        with open(os.path.join(assets_path, f'{local_item_name}.json')) as f:
+            _json = json.load(f)
 
         item = dl.Item.from_json(
             _json=_json,
             client_api=dl.client_api,
         )
-        image = Image.open(os.path.join(os.path.dirname(os.getcwd()), 'data', image_name))
+        image = Image.open(os.path.join(assets_path, f'{local_item_name}.png'))
 
         return image, item
 
     @staticmethod
     def prepare_dataset(data_path, dataset_name):
-        params = {'path': os.path.realpath(data_path),  # must be full path otherwise the train adds "datasets" to it
-                  'train': 'train',
-                  'val': 'validation',
-                  }
+        full_data_path = os.path.realpath(data_path)  # Get full path
+        params = {
+            'path': full_data_path,
+            'train': 'train',
+            'val': 'validation',
+        }
 
-        data_yaml_filename = os.path.join(data_path, f'{dataset_name}.yaml')
-        with open(data_yaml_filename, 'w') as f:
+        dataset_yaml_path = os.path.join(full_data_path, f'{dataset_name}.yaml')
+        with open(dataset_yaml_path, 'w') as f:
             yaml.dump(params, f, default_flow_style=False)
 
     def test_inference(self):
-        project_root = os.path.dirname(os.path.dirname(os.getcwd()))
-        item_stream, item = self.prepare_item(image_name='pretrained_predict.png')
+        project_root = self.get_project_root()
+        model_path = os.path.join(project_root, "models", "yolov8", "dataloop.json")
+        annotations_path = os.path.join(project_root, "tests", "assets", "annotations.json")
 
         # Load model manifest
-        with open(os.path.join(project_root, "models", "yolov8", "dataloop.json")) as f:
+        with open(model_path) as f:
             manifest = json.load(f)
         models_json = manifest['components']['models']
+
+        # Load Expected Annotations
+        with open(annotations_path) as f:
+            annotations_data = json.load(f)
 
         # Perform inference test
         for model_json in models_json:
@@ -68,42 +80,21 @@ class TestModelAdapter(unittest.TestCase):
                 project=None,
                 package=dl.Package()
             )
+
+            os.chdir(project_root)
             adapter = Adapter(model_entity=dummy_model)
-            output = adapter.predict([(item_stream, item)])
-            print(f"model `{dummy_model.name}`. output: {output}")
+            item_stream, item = self.prepare_item(local_item_name='pretrained_predict')
+            output_annotations = adapter.predict([(item_stream, item)])[0]
 
-    def test_train(self):
-        # TODO: Model call back and save to model when epoch ends must be turned off!!!
-        project_root = os.path.dirname(os.path.dirname(os.getcwd()))
-        data_path = os.path.join(project_root, 'tests', 'data')
+            # Compare annotations
+            all_annotations_types = annotations_data.get("annotations", [])
+            expected_collection = dl.AnnotationCollection()
+            for ann in all_annotations_types:
+                if ann.get("type") == dummy_model.output_type:
+                    expected_collection.add(dl.Annotation.from_json(_json=ann))
 
-        # Load model manifest
-        with open(os.path.join(project_root, "models", "yolov8", "dataloop.json")) as f:
-            manifest = json.load(f)
-        models_json = manifest['components']['models']
-
-        # Perform inference test
-        for model_json in models_json:
-            dummy_model = dl.Model.from_json(
-                _json=model_json,
-                client_api=dl.client_api,
-                project=None,
-                package=dl.Package()
-            )
-            dummy_model.configuration["train_configs"]["epochs"] = 1
-            model_output_type = dummy_model.output_type
-            segmentation_types = ["segment", "binary"]
-            if model_output_type in segmentation_types:
-                dataset_name = 'seg_train_dataset'
-                dataset_path = os.path.join(data_path, dataset_name)
-            else:
-                dataset_name = 'od_train_dataset'
-                dataset_path = os.path.join(data_path, dataset_name)
-
-            self.prepare_dataset(data_path=dataset_path, dataset_name=dataset_name)
-            adapter = Adapter(model_entity=dummy_model)
-            output = adapter.train(data_path=dataset_path, output_path=os.path.join(dataset_path, 'outputs'))
-            print(f"model `{dummy_model.name}`. output: {output}")
+            final_results = dtlpymetrics.utils.measure_annotations(annotations_set_one=expected_collection,
+                                                                   annotations_set_two=output_annotations) #TODO Problematic set (geo property)
 
 
 if __name__ == '__main__':
