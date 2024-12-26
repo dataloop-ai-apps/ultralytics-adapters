@@ -1,5 +1,3 @@
-import uuid
-
 from skimage.metrics import structural_similarity as ssim
 from model_adapter import Adapter
 from io import BytesIO
@@ -72,7 +70,7 @@ class TestModelAdapter(unittest.TestCase):
         with open(annotations_path) as f:
             annotations_data = json.load(f)
 
-        # Perform inference test
+        # Load Models from manifest
         for model_json in models_json:
             dummy_model = dl.Model.from_json(
                 _json=model_json,
@@ -84,17 +82,24 @@ class TestModelAdapter(unittest.TestCase):
             os.chdir(project_root)
             adapter = Adapter(model_entity=dummy_model)
             item_stream, item = self.prepare_item(local_item_name='pretrained_predict')
-            output_annotations = adapter.predict([(item_stream, item)])[0]
+            output_collection = adapter.predict([(item_stream, item)])[0]
 
-            # Compare annotations
+            # Predicted Annotations
+            for ann in output_collection:
+                ann.annotation_definition._item = item
+
+            # Expected Annotations
             all_annotations_types = annotations_data.get("annotations", [])
             expected_collection = dl.AnnotationCollection()
             for ann in all_annotations_types:
                 if ann.get("type") == dummy_model.output_type:
                     expected_collection.add(dl.Annotation.from_json(_json=ann))
+            for ann in expected_collection:
+                ann.annotation_definition._item = item
 
+            # Compare annotations
             final_results = dtlpymetrics.utils.measure_annotations(annotations_set_one=expected_collection,
-                                                                   annotations_set_two=output_annotations) #TODO Problematic set (geo property)
+                                                                   annotations_set_two=output_collection)
 
 
 if __name__ == '__main__':
