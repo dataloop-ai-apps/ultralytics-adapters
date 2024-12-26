@@ -437,7 +437,7 @@ class Adapter(dl.BaseModelAdapter):
             if 'video' in item.mimetype:
                 # https://docs.ultralytics.com/modes/track/#real-world-applications
                 image_annotations = item.annotations.builder()
-                results = self.model.track(source=stream,
+                results = self.model.track(source=stream,  # Handle a file path
                                            tracker='custom_tracker.yaml',
                                            stream=True,
                                            verbose=True,

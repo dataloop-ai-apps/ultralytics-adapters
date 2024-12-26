@@ -1,34 +1,4 @@
 {
-  "id": "6760288f9c9c07ad0b0a08c1",
-  "datasetId": "67600170096e5e7a0a9cfc47",
-  "url": "https://rc-gate.dataloop.ai/api/v1/items/6760288f9c9c07ad0b0a08c1",
-  "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67600170096e5e7a0a9cfc47",
-  "createdAt": "2024-12-16T13:18:07.037Z",
-  "dir": "/",
-  "filename": "/pretrained_predict.png",
-  "type": "file",
-  "hidden": false,
-  "metadata": {
-    "system": {
-      "channels": 4,
-      "encoding": "7bit",
-      "height": 731,
-      "isBinary": true,
-      "mimetype": "image/png",
-      "originalname": "pretrained_predict.png",
-      "refs": [],
-      "size": 1544036,
-      "taskStatusLog": [],
-      "thumbnailId": "6762ce7d252a2a3c572002bc",
-      "width": 1024
-    }
-  },
-  "name": "pretrained_predict.png",
-  "creator": "bot.c7b55268-d9bb-455c-813b-ea0001d2941a@bot.dataloop.ai",
-  "updatedAt": "2024-12-18T13:30:37.892Z",
-  "updatedBy": "roni.a@dataloop.ai",
-  "stream": "https://rc-gate.dataloop.ai/api/v1/items/6760288f9c9c07ad0b0a08c1/stream",
-  "thumbnail": "https://rc-gate.dataloop.ai/api/v1/items/6760288f9c9c07ad0b0a08c1/thumbnail",
   "annotations": [
     {
       "id": "67602890b75b3255abf6bb7d",
@@ -724,7 +694,5 @@
       "hash": "67600170096e5e7a0a9cfc47_6760288f9c9c07ad0b0a08c1_horse_bot.c7b55268-d9bb-455c-813b-ea0001d2941a@bot.dataloop.ai",
       "source": "sdk"
     }
-  ],
-  "annotationsCount": 3,
-  "annotated": true
+  ]
 }

@@ -1,6 +1,6 @@
 {
   "dir": "/",
-  "filename": "/pretrained_predict.png",
+  "filename": "/image_item.png",
   "type": "file",
   "metadata": {
     "system": {
@@ -9,14 +9,14 @@
       "height": 731,
       "isBinary": true,
       "mimetype": "image/png",
-      "originalname": "pretrained_predict.png",
+      "originalname": "image_item.png",
       "refs": [],
       "size": 1544036,
       "taskStatusLog": [],
       "width": 1024
     }
   },
-  "name": "pretrained_predict.png",
+  "name": "image_item.png",
   "annotationsCount": 3,
   "annotated": true,
   "projectId": "d4cda475-c384-11ef-8858-80b655f4a12c"
