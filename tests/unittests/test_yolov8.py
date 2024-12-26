@@ -82,7 +82,10 @@ class TestModelAdapter(unittest.TestCase):
             os.chdir(project_root)
             adapter = Adapter(model_entity=dummy_model)
             item_stream, item = self.prepare_item(local_item_name='pretrained_predict')
-            output_collection = adapter.predict([(item_stream, item)])[0]
+            output_collection = dl.AnnotationCollection(item=item)
+            output_annotations = adapter.predict([(item_stream, item)])[0]
+            for annotation in output_annotations:
+                output_collection.add(annotation)
 
             # Predicted Annotations
             for ann in output_collection:
@@ -90,7 +93,7 @@ class TestModelAdapter(unittest.TestCase):
 
             # Expected Annotations
             all_annotations_types = annotations_data.get("annotations", [])
-            expected_collection = dl.AnnotationCollection()
+            expected_collection = dl.AnnotationCollection(item=item)
             for ann in all_annotations_types:
                 if ann.get("type") == dummy_model.output_type:
                     expected_collection.add(dl.Annotation.from_json(_json=ann))
