@@ -172,7 +172,7 @@
     ],
     "models": [
       {
-        "name": "yolo11-Object-Detection",
+        "name": "yolo11-object-detection",
         "moduleName": "yolo11-module",
         "scope": "project",
         "status": "pre-trained",
@@ -335,7 +335,7 @@
         ]
       },
       {
-        "name": "yolo11-Segmentation",
+        "name": "yolo11-segmentation",
         "moduleName": "yolo11-module",
         "scope": "project",
         "status": "pre-trained",
@@ -498,7 +498,7 @@
         ]
       },
       {
-        "name": "yolo11-MaskSegmentation",
+        "name": "yolo11-mask-segmentation",
         "moduleName": "yolo11-module",
         "scope": "project",
         "status": "pre-trained",

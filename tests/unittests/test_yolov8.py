@@ -29,7 +29,7 @@ class TestModelAdapter(unittest.TestCase):
     @staticmethod
     def prepare_item(local_item_name):
         project_root = TestModelAdapter.get_project_root()
-        assets_path = os.path.join(project_root, "tests", "assets")
+        assets_path = os.path.join(project_root, "tests", "unittests", "assets")
         matching_files = glob.glob(os.path.join(assets_path, f"{local_item_name}.*"))
 
         if len(matching_files) < 2:
@@ -88,7 +88,7 @@ class TestModelAdapter(unittest.TestCase):
         local_item_name = 'image_item'
         project_root = self.get_project_root()
         model_path = os.path.join(project_root, "models", "yolov8", "dataloop.json")
-        annotations_path = os.path.join(project_root, "tests", "assets", f"{local_item_name}_annotations.json")
+        annotations_path = os.path.join(project_root, "tests","unittests", "assets", f"{local_item_name}_annotations.json")
 
         # Load model manifest
         with open(model_path) as f:
@@ -150,7 +150,7 @@ class TestModelAdapter(unittest.TestCase):
         local_item_name = 'video_item'
         project_root = self.get_project_root()
         model_path = os.path.join(project_root, "models", "yolov8", "dataloop.json")
-        annotations_path = os.path.join(project_root, "tests", "assets", f"{local_item_name}_annotations.json")
+        annotations_path = os.path.join(project_root, "tests", "unittests","assets", f"{local_item_name}_annotations.json")
 
         # Load model manifest
         with open(model_path) as f:

@@ -172,7 +172,7 @@
     ],
     "models": [
       {
-        "name": "yolov9-Object-Detection",
+        "name": "yolov9-object-detection",
         "moduleName": "yolov9-module",
         "scope": "project",
         "status": "pre-trained",
@@ -335,7 +335,7 @@
         ]
       },
       {
-        "name": "yolov9-Segmentation",
+        "name": "yolov9-segmentation",
         "moduleName": "yolov9-module",
         "scope": "project",
         "status": "pre-trained",
@@ -498,7 +498,7 @@
         ]
       },
       {
-        "name": "yolov9-MaskSegmentation",
+        "name": "yolov9-mask-segmentation",
         "moduleName": "yolov9-module",
         "scope": "project",
         "status": "pre-trained",

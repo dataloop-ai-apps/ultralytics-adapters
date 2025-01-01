@@ -172,7 +172,7 @@
     ],
     "models": [
       {
-        "name": "yolov10-Object-Detection",
+        "name": "yolov10-object-detection",
         "moduleName": "yolov10-module",
         "scope": "project",
         "status": "pre-trained",
