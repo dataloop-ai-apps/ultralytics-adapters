@@ -1,0 +1,186 @@
+{
+  "id": "6760358f18f17b76080d9a2b",
+  "datasetId": "67603266e76b44631d6ebd67",
+  "url": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b76080d9a2b",
+  "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+  "createdAt": "2024-12-16T14:13:35.476Z",
+  "dir": "/train",
+  "filename": "/train/melon1.jpg",
+  "type": "file",
+  "hidden": false,
+  "metadata": {
+    "system": {
+      "channels": 3,
+      "encoding": "7bit",
+      "height": 800,
+      "isBinary": true,
+      "mimetype": "image/jpeg",
+      "modalities": [],
+      "originalname": "melon1.jpg",
+      "refs": [],
+      "size": 86251,
+      "taskStatusLog": [],
+      "thumbnailId": "6760359118f17b121b0d9a84",
+      "width": 800
+    }
+  },
+  "name": "melon1.jpg",
+  "creator": "roni.a@dataloop.ai",
+  "updatedAt": "2024-12-17T10:11:46.649Z",
+  "updatedBy": "rubiks@dataloop.ai",
+  "stream": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b76080d9a2b/stream",
+  "thumbnail": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b76080d9a2b/thumbnail",
+  "annotations": [
+    {
+      "id": "6760359018f17b8b6c0d9a4c",
+      "datasetId": "67603266e76b44631d6ebd67",
+      "itemId": "6760358f18f17b76080d9a2b",
+      "url": "https://rc-gate.dataloop.ai/api/v1/annotations/6760359018f17b8b6c0d9a4c",
+      "item": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b76080d9a2b",
+      "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+      "srcAnnotation": "676035118ad3075c6de9b159",
+      "type": "box",
+      "label": "melon",
+      "attributes": [],
+      "coordinates": [
+        {
+          "x": 67.06,
+          "y": 196.71,
+          "z": 0
+        },
+        {
+          "x": 389.83,
+          "y": 540.71,
+          "z": 0
+        }
+      ],
+      "metadata": {
+        "system": {
+          "attributes": {},
+          "automated": false,
+          "clientId": "77401124-a778-410a-9b8b-88974aeeea95",
+          "coordinateVersion": "v2",
+          "endFrame": 0,
+          "endTime": 0,
+          "frame": 0,
+          "itemLinks": [],
+          "objectId": "2",
+          "openAnnotationVersion": "1.86.1-rc.14",
+          "recipeId": "67603267ed63846b43a2df1c",
+          "snapshots_": [],
+          "startTime": 0,
+          "system": false
+        },
+        "user": {}
+      },
+      "creator": "roni.a@dataloop.ai",
+      "createdAt": "2024-12-16T14:13:36.432Z",
+      "updatedBy": "roni.a@dataloop.ai",
+      "updatedAt": "2024-12-16T14:13:36.432Z",
+      "hash": "63665544703eb578ca5ab3df2d5db3600b417d13",
+      "source": "ui"
+    },
+    {
+      "id": "6760359018f17b99230d9a4e",
+      "datasetId": "67603266e76b44631d6ebd67",
+      "itemId": "6760358f18f17b76080d9a2b",
+      "url": "https://rc-gate.dataloop.ai/api/v1/annotations/6760359018f17b99230d9a4e",
+      "item": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b76080d9a2b",
+      "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+      "srcAnnotation": "676035118ad307c0b2e9b158",
+      "type": "box",
+      "label": "melon",
+      "attributes": [],
+      "coordinates": [
+        {
+          "x": 3.39,
+          "y": 341.74,
+          "z": 0
+        },
+        {
+          "x": 88.28,
+          "y": 634.45,
+          "z": 0
+        }
+      ],
+      "metadata": {
+        "system": {
+          "attributes": {},
+          "automated": false,
+          "clientId": "a78fcfd1-96d4-47b4-a4af-227d6765ed40",
+          "coordinateVersion": "v2",
+          "endFrame": 0,
+          "endTime": 0,
+          "frame": 0,
+          "itemLinks": [],
+          "objectId": "1",
+          "openAnnotationVersion": "1.86.1-rc.14",
+          "recipeId": "67603267ed63846b43a2df1c",
+          "snapshots_": [],
+          "startTime": 0,
+          "system": false
+        },
+        "user": {}
+      },
+      "creator": "roni.a@dataloop.ai",
+      "createdAt": "2024-12-16T14:13:36.514Z",
+      "updatedBy": "roni.a@dataloop.ai",
+      "updatedAt": "2024-12-16T14:13:36.514Z",
+      "hash": "30404f05467b206c0aa2314281e387a58f51f5ee",
+      "source": "ui"
+    },
+    {
+      "id": "6760359018f17bd7130d9a4a",
+      "datasetId": "67603266e76b44631d6ebd67",
+      "itemId": "6760358f18f17b76080d9a2b",
+      "url": "https://rc-gate.dataloop.ai/api/v1/annotations/6760359018f17bd7130d9a4a",
+      "item": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b76080d9a2b",
+      "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+      "srcAnnotation": "676035118ad3073b1be9b15a",
+      "type": "box",
+      "label": "melon",
+      "attributes": [],
+      "coordinates": [
+        {
+          "x": 431.39,
+          "y": 218.82,
+          "z": 0
+        },
+        {
+          "x": 777.16,
+          "y": 500.90999999999997,
+          "z": 0
+        }
+      ],
+      "metadata": {
+        "system": {
+          "attributes": {},
+          "automated": false,
+          "clientId": "298a4750-2c37-4af9-9fef-1a00135e3058",
+          "coordinateVersion": "v2",
+          "endFrame": 0,
+          "endTime": 0,
+          "frame": 0,
+          "itemLinks": [],
+          "objectId": "3",
+          "openAnnotationVersion": "1.86.1-rc.14",
+          "recipeId": "67603267ed63846b43a2df1c",
+          "snapshots_": [],
+          "startTime": 0,
+          "system": false
+        },
+        "user": {}
+      },
+      "creator": "roni.a@dataloop.ai",
+      "createdAt": "2024-12-16T14:13:36.367Z",
+      "updatedBy": "roni.a@dataloop.ai",
+      "updatedAt": "2024-12-16T14:13:36.367Z",
+      "hash": "717d55c10df2bd5e697ac9f121793c5b8d341241",
+      "source": "ui"
+    }
+  ],
+  "annotationsCount": 3,
+  "annotated": true,
+  "srcItem": "6760347da6c0c86e68dd5756",
+  "srcDataset": "67603266e76b44631d6ebd67"
+}

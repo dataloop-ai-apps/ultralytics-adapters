@@ -1,0 +1,137 @@
+{
+  "id": "6760358f18f17b18030d9a2f",
+  "datasetId": "67603266e76b44631d6ebd67",
+  "url": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b18030d9a2f",
+  "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+  "createdAt": "2024-12-16T14:13:35.476Z",
+  "dir": "/train",
+  "filename": "/train/melon3.jpg",
+  "type": "file",
+  "hidden": false,
+  "metadata": {
+    "system": {
+      "channels": 3,
+      "encoding": "7bit",
+      "height": 225,
+      "isBinary": true,
+      "mimetype": "image/jpeg",
+      "modalities": [],
+      "originalname": "melon3.jpg",
+      "refs": [],
+      "size": 8967,
+      "taskStatusLog": [],
+      "thumbnailId": "6760359118f17b306c0d9a82",
+      "width": 225
+    }
+  },
+  "name": "melon3.jpg",
+  "creator": "roni.a@dataloop.ai",
+  "updatedAt": "2024-12-17T10:11:46.443Z",
+  "updatedBy": "rubiks@dataloop.ai",
+  "stream": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b18030d9a2f/stream",
+  "thumbnail": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b18030d9a2f/thumbnail",
+  "annotations": [
+    {
+      "id": "6760359018f17b9e830d9a53",
+      "datasetId": "67603266e76b44631d6ebd67",
+      "itemId": "6760358f18f17b18030d9a2f",
+      "url": "https://rc-gate.dataloop.ai/api/v1/annotations/6760359018f17b9e830d9a53",
+      "item": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b18030d9a2f",
+      "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+      "srcAnnotation": "676034feb75b3244a9f6bd60",
+      "type": "box",
+      "label": "melon",
+      "attributes": [],
+      "coordinates": [
+        {
+          "x": 26.07,
+          "y": 19.79,
+          "z": 0
+        },
+        {
+          "x": 127.05000000000001,
+          "y": 134.38,
+          "z": 0
+        }
+      ],
+      "metadata": {
+        "system": {
+          "attributes": {},
+          "automated": false,
+          "clientId": "1e4ce9fe-a8a4-435f-82c8-48521e116e2e",
+          "coordinateVersion": "v2",
+          "endFrame": 0,
+          "endTime": 0,
+          "frame": 0,
+          "itemLinks": [],
+          "objectId": "1",
+          "openAnnotationVersion": "1.86.1-rc.14",
+          "recipeId": "67603267ed63846b43a2df1c",
+          "snapshots_": [],
+          "startTime": 0,
+          "system": false
+        },
+        "user": {}
+      },
+      "creator": "roni.a@dataloop.ai",
+      "createdAt": "2024-12-16T14:13:36.642Z",
+      "updatedBy": "roni.a@dataloop.ai",
+      "updatedAt": "2024-12-16T14:13:36.642Z",
+      "hash": "a6d1288b1fb73ee9423ad9989cc9efa213868e30",
+      "source": "ui"
+    },
+    {
+      "id": "6760359018f17bdf6e0d9a55",
+      "datasetId": "67603266e76b44631d6ebd67",
+      "itemId": "6760358f18f17b18030d9a2f",
+      "url": "https://rc-gate.dataloop.ai/api/v1/annotations/6760359018f17bdf6e0d9a55",
+      "item": "https://rc-gate.dataloop.ai/api/v1/items/6760358f18f17b18030d9a2f",
+      "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+      "srcAnnotation": "676034feb75b32742ef6bd61",
+      "type": "box",
+      "label": "melon",
+      "attributes": [],
+      "coordinates": [
+        {
+          "x": 94.38,
+          "y": 57.9,
+          "z": 0
+        },
+        {
+          "x": 216.64,
+          "y": 181.4,
+          "z": 0
+        }
+      ],
+      "metadata": {
+        "system": {
+          "attributes": {},
+          "automated": false,
+          "clientId": "f2b6e7cb-a065-4c54-aa48-85ac54adb58c",
+          "coordinateVersion": "v2",
+          "endFrame": 0,
+          "endTime": 0,
+          "frame": 0,
+          "itemLinks": [],
+          "objectId": "2",
+          "openAnnotationVersion": "1.86.1-rc.14",
+          "recipeId": "67603267ed63846b43a2df1c",
+          "snapshots_": [],
+          "startTime": 0,
+          "system": false
+        },
+        "user": {}
+      },
+      "creator": "roni.a@dataloop.ai",
+      "createdAt": "2024-12-16T14:13:36.724Z",
+      "updatedBy": "roni.a@dataloop.ai",
+      "updatedAt": "2024-12-16T14:13:36.724Z",
+      "hash": "7e51dbe42d69c35e438fbf6e2ebd929f5f1ba78f",
+      "source": "ui"
+    }
+  ],
+  "annotationsCount": 2,
+  "annotated": true,
+  "srcItem": "6760347dd557832fad7b6ae2",
+  "srcDataset": "67603266e76b44631d6ebd67"
+}

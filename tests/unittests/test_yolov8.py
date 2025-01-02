@@ -12,6 +12,14 @@ import os
 
 
 class TestModelAdapter(unittest.TestCase):
+
+    def setUp(self):
+        """
+        Set up the test environment. This method is called before each test.
+        """
+        self.project_root = self.get_project_root()
+        self.assets_path = os.path.join(self.project_root, "tests", "assets", "unittests")
+
     @staticmethod
     def get_project_root():
         """
@@ -26,11 +34,8 @@ class TestModelAdapter(unittest.TestCase):
             # Assume the current working directory is already the project root
             return current_dir
 
-    @staticmethod
-    def prepare_item(local_item_name):
-        project_root = TestModelAdapter.get_project_root()
-        assets_path = os.path.join(project_root, "tests", "unittests", "assets")
-        matching_files = glob.glob(os.path.join(assets_path, f"{local_item_name}.*"))
+    def prepare_item(self, local_item_name):
+        matching_files = glob.glob(os.path.join(self.assets_path, f"{local_item_name}.*"))
 
         if len(matching_files) < 2:
             raise FileNotFoundError(
@@ -88,7 +93,8 @@ class TestModelAdapter(unittest.TestCase):
         local_item_name = 'image_item'
         project_root = self.get_project_root()
         model_path = os.path.join(project_root, "models", "yolov8", "dataloop.json")
-        annotations_path = os.path.join(project_root, "tests","unittests", "assets", f"{local_item_name}_annotations.json")
+        annotations_path = os.path.join(self.assets_path,
+                                        f"{local_item_name}_annotations.json")
 
         # Load model manifest
         with open(model_path) as f:
@@ -150,7 +156,8 @@ class TestModelAdapter(unittest.TestCase):
         local_item_name = 'video_item'
         project_root = self.get_project_root()
         model_path = os.path.join(project_root, "models", "yolov8", "dataloop.json")
-        annotations_path = os.path.join(project_root, "tests", "unittests","assets", f"{local_item_name}_annotations.json")
+        annotations_path = os.path.join(self.assets_path,
+                                        f"{local_item_name}_annotations.json")
 
         # Load model manifest
         with open(model_path) as f:

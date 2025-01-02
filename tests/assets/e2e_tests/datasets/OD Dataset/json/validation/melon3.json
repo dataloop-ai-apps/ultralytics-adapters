@@ -1,0 +1,132 @@
+{
+  "id": "6760347dd557832fad7b6ae2",
+  "datasetId": "67603266e76b44631d6ebd67",
+  "url": "https://rc-gate.dataloop.ai/api/v1/items/6760347dd557832fad7b6ae2",
+  "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+  "createdAt": "2024-12-16T14:09:01.528Z",
+  "dir": "/validation",
+  "filename": "/validation/melon3.jpg",
+  "type": "file",
+  "hidden": false,
+  "metadata": {
+    "system": {
+      "channels": 3,
+      "encoding": "7bit",
+      "height": 225,
+      "isBinary": true,
+      "mimetype": "image/jpeg",
+      "originalname": "melon3.jpg",
+      "refs": [],
+      "size": 8967,
+      "taskStatusLog": [],
+      "thumbnailId": "6760348295dafe8873c468b5",
+      "width": 225
+    }
+  },
+  "name": "melon3.jpg",
+  "creator": "roni.a@dataloop.ai",
+  "updatedAt": "2024-12-16T14:09:06.287Z",
+  "updatedBy": "roni.a@dataloop.ai",
+  "stream": "https://rc-gate.dataloop.ai/api/v1/items/6760347dd557832fad7b6ae2/stream",
+  "thumbnail": "https://rc-gate.dataloop.ai/api/v1/items/6760347dd557832fad7b6ae2/thumbnail",
+  "annotations": [
+    {
+      "id": "676034feb75b3244a9f6bd60",
+      "datasetId": "67603266e76b44631d6ebd67",
+      "itemId": "6760347dd557832fad7b6ae2",
+      "url": "https://rc-gate.dataloop.ai/api/v1/annotations/676034feb75b3244a9f6bd60",
+      "item": "https://rc-gate.dataloop.ai/api/v1/items/6760347dd557832fad7b6ae2",
+      "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+      "type": "box",
+      "label": "melon",
+      "attributes": [],
+      "coordinates": [
+        {
+          "x": 26.07,
+          "y": 19.79,
+          "z": 0
+        },
+        {
+          "x": 127.05000000000001,
+          "y": 134.38,
+          "z": 0
+        }
+      ],
+      "metadata": {
+        "system": {
+          "attributes": {},
+          "automated": false,
+          "clientId": "1e4ce9fe-a8a4-435f-82c8-48521e116e2e",
+          "coordinateVersion": "v2",
+          "endFrame": 0,
+          "endTime": 0,
+          "frame": 0,
+          "itemLinks": [],
+          "objectId": "1",
+          "openAnnotationVersion": "1.86.1-rc.14",
+          "recipeId": "67603267ed63846b43a2df1c",
+          "snapshots_": [],
+          "startTime": 0,
+          "system": false
+        },
+        "user": {}
+      },
+      "creator": "roni.a@dataloop.ai",
+      "createdAt": "2024-12-16T14:11:10.608Z",
+      "updatedBy": "roni.a@dataloop.ai",
+      "updatedAt": "2024-12-16T14:11:10.608Z",
+      "hash": "ee0bc9f6422dc331650d73d523aa6681ca0314e4",
+      "source": "ui"
+    },
+    {
+      "id": "676034feb75b32742ef6bd61",
+      "datasetId": "67603266e76b44631d6ebd67",
+      "itemId": "6760347dd557832fad7b6ae2",
+      "url": "https://rc-gate.dataloop.ai/api/v1/annotations/676034feb75b32742ef6bd61",
+      "item": "https://rc-gate.dataloop.ai/api/v1/items/6760347dd557832fad7b6ae2",
+      "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603266e76b44631d6ebd67",
+      "type": "box",
+      "label": "melon",
+      "attributes": [],
+      "coordinates": [
+        {
+          "x": 94.38,
+          "y": 57.9,
+          "z": 0
+        },
+        {
+          "x": 216.64,
+          "y": 181.4,
+          "z": 0
+        }
+      ],
+      "metadata": {
+        "system": {
+          "attributes": {},
+          "automated": false,
+          "clientId": "f2b6e7cb-a065-4c54-aa48-85ac54adb58c",
+          "coordinateVersion": "v2",
+          "endFrame": 0,
+          "endTime": 0,
+          "frame": 0,
+          "itemLinks": [],
+          "objectId": "2",
+          "openAnnotationVersion": "1.86.1-rc.14",
+          "recipeId": "67603267ed63846b43a2df1c",
+          "snapshots_": [],
+          "startTime": 0,
+          "system": false
+        },
+        "user": {}
+      },
+      "creator": "roni.a@dataloop.ai",
+      "createdAt": "2024-12-16T14:11:10.608Z",
+      "updatedBy": "roni.a@dataloop.ai",
+      "updatedAt": "2024-12-16T14:11:10.608Z",
+      "hash": "ceb7f88732e343a9a2d1479065a4293fe11c8277",
+      "source": "ui"
+    }
+  ],
+  "annotationsCount": 2,
+  "annotated": true
+}

@@ -41,13 +41,16 @@
     {
       "name": "dataset",
       "type": "Dataset",
-      "value": "67603889209b7763f11c1af6"
+      "value": null
     },
     {
-      "name": "label",
-      "type": "String",
+      "name": "labels",
+      "type": "String[]",
       "description": null,
-      "value": "car"
+      "value": [
+        "pear",
+        "melon"
+      ]
     }
   ],
   "description": "",
@@ -172,7 +175,7 @@
         {
           "portId": "c12a3c92-9bd3-4e32-8c9b-56da18c8c8a7",
           "nodeId": "c12a3c92-9bd3-4e32-8c9b-56da18c8c8a7",
-          "type": "List",
+          "type": "String[]",
           "name": "labels",
           "displayName": "labels",
           "variableName": "labels",
@@ -193,7 +196,8 @@
       "projectId": null,
       "config": {
         "package": {
-          "code": "import dtlpy as dl\n\nclass ServiceRunner:\n    @staticmethod\n    def run(item: dl.Item, labels: list):\n        annotations = item.annotations.list()\n        for annotation in annotations:\n            if annotation.label not in labels:\n                raise ValueError(f\"Expected the model to predict one of: {labels}, but got: {annotation.label} instead\")\n",          "name": "run",
+          "code": "import dtlpy as dl\n\nclass ServiceRunner:\n    @staticmethod\n    def run(item: dl.Item, labels: list):\n        annotations = item.annotations.list()\n        for annotation in annotations:\n            if annotation.label not in labels:\n                raise ValueError(f\"Expected the model to predict one of: {labels}, but got: {annotation.label} instead\")\n",
+          "name": "run",
           "type": "code",
           "codebase": {
             "type": "item"
