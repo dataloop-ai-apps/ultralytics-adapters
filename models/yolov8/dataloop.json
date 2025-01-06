@@ -335,7 +335,7 @@
         ]
       },
       {
-        "name": "yolov8l-segmentation",
+        "name": "yolov8-segmentation",
         "moduleName": "yolov8-module",
         "scope": "project",
         "status": "pre-trained",
@@ -498,7 +498,7 @@
         ]
       },
       {
-        "name": "yolov8l-mask-segmentation",
+        "name": "yolov8-mask-segmentation",
         "moduleName": "yolov8-module",
         "scope": "project",
         "status": "pre-trained",

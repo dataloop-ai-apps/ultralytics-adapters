@@ -61,7 +61,7 @@ class TestModelAdapter(unittest.TestCase):
 
     def test_inference_image(self, mean_score_threshold=0.9, precision_threshold=0.9, recall_threshold=0.9):
         local_item_name = 'image_item'
-        model_path = os.path.join(self.project_root, "models", "yolov8", "dataloop.json")
+        model_path = os.path.join(self.project_root, "models", "yolov10", "dataloop.json")
 
         # Load model manifest
         with open(model_path) as f:
@@ -121,7 +121,7 @@ class TestModelAdapter(unittest.TestCase):
 
     def test_inference_video(self, mean_score_threshold=0.5, precision_threshold=0.5, recall_threshold=0.5):
         local_item_name = 'video_item'
-        model_path = os.path.join(self.project_root, "models", "yolov8", "dataloop.json")
+        model_path = os.path.join(self.project_root, "models", "yolov10", "dataloop.json")
 
         # Load model manifest
         with open(model_path) as f:

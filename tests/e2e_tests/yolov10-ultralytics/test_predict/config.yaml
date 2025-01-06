@@ -1,26 +1,26 @@
 # ordered list of dpks to publish and install
 dpks:
-    - name: yolov8-ultralytics
+    - name: yolov10-ultralytics
       install_app: True
 
 # ordered list of datasets to create from local assets or to get from installed apps
 datasets:
-    - name: SEG Dataset
+    - name: OD Dataset
       type: local
 
 # ordered list of models to get from apps
 models:
-    - name: yolov8-segmentation
+    - name: yolov10-object-detection
       deploy_model: False
-      source_app: yolov8-ultralytics
+      source_app: yolov10-ultralytics
 
 # list of pipeline variables to update with reference
 variables:
     - name: dataset
       resource_type: datasets
       resource_value:
-          resource_name: SEG Dataset
+          resource_name: OD Dataset
     - name: model
       resource_type: models
       resource_value:
-          resource_name: yolov8-segmentation
+          resource_name: yolov10-object-detection
