@@ -319,6 +319,10 @@ class Adapter(dl.BaseModelAdapter):
             overlap_mask=overlap_mask,  # Overlap mask usage
             patience=patience  # Early stopping patience
         )
+        
+        if 'start_epoch' in self.configuration and self.configuration['start_epoch'] == epochs:
+            self.model_entity.configuration['start_epoch'] = 0
+            self.model_entity.update()
 
     def create_box_annotation(self, res, annotation_collection, confidence_threshold):
         for d in reversed(res.boxes):
