@@ -404,57 +404,64 @@ class Adapter(dl.BaseModelAdapter):
         imgsz = predict_config.get('imgsz', 640)
         classes = predict_config.get('classes', None)
 
+        # Split batch into images and videos
+        image_batch = [(stream, item) for stream, item in batch if 'image' in item.mimetype]
+        video_batch = [(stream, item) for stream, item in batch if 'video' in item.mimetype]
+
         batch_annotations = list()
         output_type = self.model_entity.output_type
-        for stream, item in batch:
-            if 'image' in item.mimetype:
-                image_annotations = dl.AnnotationCollection()
-                results = self.model.predict(source=stream,
-                                             iou=iou,
-                                             half=half,
-                                             max_det=max_det,
-                                             augment=augment,
-                                             agnostic_nms=agnostic_nms,
-                                             classes=classes,
-                                             imgsz=imgsz,
-                                             save=False,
-                                             save_txt=False)  # save predictions as labels
 
-                for i_img, res in enumerate(results):  # per image
-                    if output_type == 'box':
-                        self.create_box_annotation(res=res,
-                                                   annotation_collection=image_annotations,
-                                                   confidence_threshold=confidence_threshold)
-                    elif output_type == 'binary' or output_type == 'segment':  # SEGMENTATION
-                        self.create_segmentation_annotation(res=res,
-                                                            annotation_collection=image_annotations,
-                                                            confidence_threshold=confidence_threshold,
-                                                            output_type=output_type)
-                    else:
-                        raise ValueError(f'Unsupported output type: {output_type}')
-                batch_annotations.append(image_annotations)
-
-            if 'video' in item.mimetype:
-                # https://docs.ultralytics.com/modes/track/#real-world-applications
+        # Process image batch
+        if len(image_batch) > 0:
+            images = [stream for stream, item in batch if 'image' in item.mimetype]
+            images_results = self.model.predict(source=images,
+                                    iou=iou,
+                                    half=half,
+                                    max_det=max_det,
+                                    augment=augment,
+                                    agnostic_nms=agnostic_nms,
+                                    classes=classes,
+                                    imgsz=imgsz,
+                                    save=False,
+                                    save_txt=False)  # save predictions as labels
+            
+            for i_img, res in enumerate(images_results):  # per image
+                _, item = image_batch[i_img]  # Get the item from the (stream, item) tuple
                 image_annotations = item.annotations.builder()
-                results = self.model.track(source=stream,  # Handle a file path
-                                           tracker='custom_tracker.yaml',
-                                           stream=True,
-                                           verbose=True,
-                                           iou=iou,
-                                           half=half,
-                                           max_det=max_det,
-                                           augment=augment,
-                                           agnostic_nms=agnostic_nms,
-                                           classes=classes,
-                                           vid_stride=vid_stride,
-                                           imgsz=imgsz,
-                                           save=False,
-                                           save_txt=False)
-                self.create_video_annotation(res=results,
-                                             annotation_collection=image_annotations,
-                                             confidence_threshold=confidence_threshold,
-                                             include_untracked=include_untracked)
+                if output_type == 'box':
+                    self.create_box_annotation(res=res,
+                                            annotation_collection=image_annotations,
+                                            confidence_threshold=confidence_threshold)
+                elif output_type == 'binary' or output_type == 'segment':  # SEGMENTATION
+                    self.create_segmentation_annotation(res=res,
+                                                        annotation_collection=image_annotations,
+                                                        confidence_threshold=confidence_threshold,
+                                                        output_type=output_type)
+                else:
+                    raise ValueError(f'Unsupported output type: {output_type}')
                 batch_annotations.append(image_annotations)
+
+        # Process video batch
+        for video, item in video_batch:
+            video_annotations = item.annotations.builder()
+            results = self.model.track(source=video,  # Handle a file path
+                                        tracker='custom_tracker.yaml',
+                                        stream=True,
+                                        verbose=True,
+                                        iou=iou,
+                                        half=half,
+                                        max_det=max_det,
+                                        augment=augment,
+                                        agnostic_nms=agnostic_nms,
+                                        classes=classes,
+                                        vid_stride=vid_stride,
+                                        imgsz=imgsz,
+                                        save=False,
+                                        save_txt=False)
+            self.create_video_annotation(res=results,
+                                            annotation_collection=video_annotations,
+                                            confidence_threshold=confidence_threshold,
+                                            include_untracked=include_untracked)
+            batch_annotations.append(video_annotations)
 
         return batch_annotations
