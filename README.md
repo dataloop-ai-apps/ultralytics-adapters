@@ -35,7 +35,7 @@ you can use DQL filter to have training and validation subsets.
 For fine-tuning on a custom dataset, via SDK,
 click [here](https://developers.dataloop.ai/tutorials/model_management/ai_library/chapter/#finetune-on-a-custom-dataset).
 
-## Supposrted Models:
+## Supported Models:
 
 - YOLOv8: This version includes three models: object detection, mask segmentation, and polygon segmentation. The default weights are `yolov8m.pt` and `yolov8m-seg.pt`.
 
