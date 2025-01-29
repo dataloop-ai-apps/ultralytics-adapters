@@ -35,10 +35,22 @@ you can use DQL filter to have training and validation subsets.
 For fine-tuning on a custom dataset, via SDK,
 click [here](https://developers.dataloop.ai/tutorials/model_management/ai_library/chapter/#finetune-on-a-custom-dataset).
 
+## Supposrted Models:
+
+- YOLOv8: This version includes three models: object detection, mask segmentation, and polygon segmentation. The default weights are `yolov8m.pt` and `yolov8m-seg.pt`.
+
+- YOLOv9: This version includes three models: object detection, mask segmentation, and polygon segmentation. The default weights are `yolov9c.pt` and `yolov9c-seg.pt`.
+
+- YOLOv10: This version includes an object detection model. The default weights are `yolov10m.pt`. 
+
+- YOLO11: This version includes three models: object detection, mask segmentation, and polygon segmentation. The default weights are `yolov11m.pt` and `yolov11m-seg.pt`.
+
+For all models, to use a different weights file, update the `weights_filename` in the model configuration and upload the new weights file as an artifact. For instructions on uploading artifacts, refer to [this guide](https://developers.dataloop.ai/tutorials/model_management/ai_library/chapter/#upload-artifacts).
+
+
 ### Editing the configuration
 
-To edit configurations via the platform, go to the YOLO page in the Model Management and edit the json
-file displayed there or, via the SDK, by editing the model configuration.
+To edit configurations via the platform, navigate to the YOLO model page in the Model Management section and modify the JSON file displayed there. Alternatively, you can edit the model configuration using the SDK.
 Click [here](https://developers.dataloop.ai/tutorials/model_management/ai_library/chapter/#model-configuration) for more
 information.
 
