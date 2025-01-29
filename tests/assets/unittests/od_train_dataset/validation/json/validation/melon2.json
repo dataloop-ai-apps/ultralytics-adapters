@@ -1,0 +1,71 @@
+{
+  "id": "676038aed5578307277b6ba9",
+  "datasetId": "67603889209b7763f11c1af6",
+  "url": "https://rc-gate.dataloop.ai/api/v1/items/676038aed5578307277b6ba9",
+  "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603889209b7763f11c1af6",
+  "createdAt": "2024-12-16T14:26:54.354Z",
+  "dir": "/validation",
+  "filename": "/validation/melon2.jpg",
+  "type": "file",
+  "hidden": false,
+  "metadata": {
+    "system": {
+      "channels": 3,
+      "encoding": "7bit",
+      "height": 191,
+      "isBinary": true,
+      "mimetype": "image/jpeg",
+      "originalname": "melon2.jpg",
+      "refs": [],
+      "size": 9355,
+      "taskStatusLog": [],
+      "thumbnailId": "676038b1530b2a501f1d6ae3",
+      "width": 263
+    }
+  },
+  "name": "melon2.jpg",
+  "creator": "roni.a@dataloop.ai",
+  "updatedAt": "2024-12-16T14:26:57.504Z",
+  "updatedBy": "roni.a@dataloop.ai",
+  "stream": "https://rc-gate.dataloop.ai/api/v1/items/676038aed5578307277b6ba9/stream",
+  "thumbnail": "https://rc-gate.dataloop.ai/api/v1/items/676038aed5578307277b6ba9/thumbnail",
+  "annotations": [
+    {
+      "id": "6760425ab75b323c45f6c069",
+      "datasetId": "67603889209b7763f11c1af6",
+      "itemId": "676038aed5578307277b6ba9",
+      "url": "https://rc-gate.dataloop.ai/api/v1/annotations/6760425ab75b323c45f6c069",
+      "item": "https://rc-gate.dataloop.ai/api/v1/items/676038aed5578307277b6ba9",
+      "dataset": "https://rc-gate.dataloop.ai/api/v1/datasets/67603889209b7763f11c1af6",
+      "type": "binary",
+      "label": "melon",
+      "attributes": [],
+      "coordinates": "data:image/png;base64,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",
+      "metadata": {
+        "system": {
+          "attributes": {},
+          "automated": false,
+          "clientId": "37e0670e-3bee-450b-ad12-b4907ab1d480",
+          "endFrame": 1,
+          "endTime": 0,
+          "frame": 0,
+          "itemLinks": [],
+          "openAnnotationVersion": "1.86.1-rc.18",
+          "recipeId": "6760388bed6384ee25a2df1e",
+          "snapshots_": [],
+          "startTime": 0,
+          "system": false
+        },
+        "user": {}
+      },
+      "creator": "roni.a@dataloop.ai",
+      "createdAt": "2024-12-16T15:08:10.363Z",
+      "updatedBy": "roni.a@dataloop.ai",
+      "updatedAt": "2024-12-16T15:08:10.363Z",
+      "hash": "67603889209b7763f11c1af6_676038aed5578307277b6ba9_melon_roni.a@dataloop.ai",
+      "source": "ui"
+    }
+  ],
+  "annotationsCount": 1,
+  "annotated": true
+}
