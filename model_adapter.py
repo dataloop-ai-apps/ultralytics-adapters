@@ -410,8 +410,7 @@ class Adapter(dl.BaseModelAdapter):
         classes = predict_config.get('classes', None)
 
         # Check if batch contains both images and videos
-        batch_mimetypes = [item.mimetype for _, item in batch]
-        mimetype_types = [mime.split('/')[0] for mime in batch_mimetypes] # get the type of the mimetype without file extension
+        mimetype_types = [item.mimetype.split('/')[0] for _, item in batch] # get the type of the mimetype without file extension
         if 'image' in mimetype_types and 'video' in mimetype_types:
             raise ValueError('Batch contains both images and videos, which is not supported. Please split the batch into images and videos.')
         
@@ -472,4 +471,3 @@ class Adapter(dl.BaseModelAdapter):
                 batch_annotations.append(video_annotations)
 
         return batch_annotations
-    
