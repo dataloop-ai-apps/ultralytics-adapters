@@ -1,6 +1,6 @@
 {
   "name": "yolov8-ultralytics",
-  "displayName": "YOLOv8",
+  "displayName": "YOLOv8 Ultralytics",
   "version": "0.0.2",
   "scope": "public",
   "description": "An object detection model by Ultralytics that builds on previous YOLO architectures, offering improved speed, accuracy, and ease of deployment for real-time applications.",
