@@ -1,6 +1,6 @@
 {
   "name": "yolov10-ultralytics",
-  "displayName": "YOLOv10",
+  "displayName": "YOLOv10 Ultralytics",
   "version": "0.0.2",
   "scope": "public",
   "description": "A projected version in the YOLO series designed to enhance multi-task learning and detection capabilities with incremental architectural updates.",

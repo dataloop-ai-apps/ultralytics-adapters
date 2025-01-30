@@ -1,6 +1,6 @@
 {
   "name": "yolov9-ultralytics",
-  "displayName": "YOLOv9",
+  "displayName": "YOLOv9 Ultralytics",
   "version": "0.0.2",
   "scope": "public",
   "description": "A continuation of the YOLO series by Ultralytics, focusing on refined detection algorithms and model efficiency to support advanced object detection tasks.",
