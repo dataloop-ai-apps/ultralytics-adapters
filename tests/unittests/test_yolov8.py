@@ -13,22 +13,8 @@ class TestModelAdapter(unittest.TestCase):
         """
         Set up the test environment. This method is called before each test.
         """
-        self.project_root = self.get_project_root()
+        self.project_root = os.getcwd()
         self.assets_path = os.path.join(self.project_root, "tests", "assets", "unittests")
-
-    @staticmethod
-    def get_project_root():
-        """
-        Get the project root directory dynamically, enable to run both from file tests and root.
-        """
-        current_dir = os.getcwd()  # Get the current working directory
-        # Check if the current directory is within the 'tests/unittests' folder
-        if current_dir.endswith(os.path.join("tests", "unittests")):
-            # Go up two levels to get to the project root
-            return os.path.abspath(os.path.join(current_dir, "..", ".."))
-        else:
-            # Assume the current working directory is already the project root
-            return current_dir
 
     def prepare_item(self, local_item_name):
         matching_files = glob.glob(

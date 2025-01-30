@@ -28,6 +28,7 @@ model and item creation and prediction accuracy for both images and videos.
 
 1. Ensure all dependencies are installed and models are correctly set up.
 2. Run the test suite using your preferred test runner (e.g., `unittest` or `pytest`).
+3. Run the tests from the project's root.
 
-```bash
+```bash 
 python -m unittest discover -s tests/unittests -p "test_*.py"

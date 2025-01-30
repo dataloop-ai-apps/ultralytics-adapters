@@ -409,16 +409,17 @@ class Adapter(dl.BaseModelAdapter):
         imgsz = predict_config.get('imgsz', 640)
         classes = predict_config.get('classes', None)
 
-        # Split batch into images and videos
-        image_batch = [(stream, item) for stream, item in batch if 'image' in item.mimetype]
-        video_batch = [(stream, item) for stream, item in batch if 'video' in item.mimetype]
-
+        # Check if batch contains both images and videos
+        mimetype_types = [item.mimetype.split('/')[0] for _, item in batch] # get the type of the mimetype without file extension
+        if 'image' in mimetype_types and 'video' in mimetype_types:
+            raise ValueError('Batch contains both images and videos, which is not supported. Please split the batch into images and videos.')
+        
         batch_annotations = list()
         output_type = self.model_entity.output_type
 
-        # Process image batch
-        if len(image_batch) > 0:
-            images = [stream for stream, item in batch if 'image' in item.mimetype]
+        # Process images batch
+        if 'image' in mimetype_types:
+            images = [stream for stream, _ in batch]
             images_results = self.model.predict(source=images,
                                                 iou=iou,
                                                 half=half,
@@ -430,9 +431,8 @@ class Adapter(dl.BaseModelAdapter):
                                                 save=False,
                                                 save_txt=False)  # save predictions as labels
 
-            for i_img, res in enumerate(images_results):  # per image
-                _, item = image_batch[i_img]  # Get the item from the (stream, item) tuple
-                image_annotations = item.annotations.builder()
+            for _, res in enumerate(images_results):  # per image
+                image_annotations = dl.AnnotationCollection()
                 if output_type == 'box':
                     self.create_box_annotation(res=res,
                                                annotation_collection=image_annotations,
@@ -446,27 +446,28 @@ class Adapter(dl.BaseModelAdapter):
                     raise ValueError(f'Unsupported output type: {output_type}')
                 batch_annotations.append(image_annotations)
 
-        # Process video batch
-        for video, item in video_batch:
-            video_annotations = item.annotations.builder()
-            results = self.model.track(source=video,  # Handle a file path
-                                       tracker='custom_tracker.yaml',
-                                       stream=True,
-                                       verbose=True,
-                                       iou=iou,
-                                       half=half,
-                                       max_det=max_det,
-                                       augment=augment,
-                                       agnostic_nms=agnostic_nms,
-                                       classes=classes,
-                                       vid_stride=vid_stride,
-                                       imgsz=imgsz,
-                                       save=False,
-                                       save_txt=False)
-            self.create_video_annotation(res=results,
-                                         annotation_collection=video_annotations,
-                                         confidence_threshold=confidence_threshold,
-                                         include_untracked=include_untracked)
-            batch_annotations.append(video_annotations)
+        # Process videos - track one video at a time
+        if 'video' in mimetype_types:
+            for video, item in batch:
+                video_annotations = item.annotations.builder()
+                results = self.model.track(source=video,  # Handle a file path
+                                        tracker='custom_tracker.yaml',
+                                        stream=True,
+                                        verbose=True,
+                                        iou=iou,
+                                        half=half,
+                                        max_det=max_det,
+                                        augment=augment,
+                                        agnostic_nms=agnostic_nms,
+                                        classes=classes,
+                                        vid_stride=vid_stride,
+                                        imgsz=imgsz,
+                                        save=False,
+                                        save_txt=False)
+                self.create_video_annotation(res=results,
+                                            annotation_collection=video_annotations,
+                                            confidence_threshold=confidence_threshold,
+                                            include_untracked=include_untracked)
+                batch_annotations.append(video_annotations)
 
         return batch_annotations
