@@ -1,6 +1,6 @@
 {
   "name": "yolo11-ultralytics",
-  "displayName": "YOLO11",
+  "displayName": "YOLO11 Ultralytics",
   "version": "0.0.1",
   "scope": "public",
   "description": "An anticipated model in the YOLO framework aimed at addressing complex detection challenges with optimized scalability and improved computational efficiency.",
