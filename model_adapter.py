@@ -29,17 +29,17 @@ class Adapter(dl.BaseModelAdapter):
         default_weights = os.path.join('/tmp/app/weights', model_filename)
 
         if os.path.isfile(model_filepath):
-            model = YOLO(model_filepath)
+            model = YOLO(model_filepath, verbose=True)
             logger.info(f"Loaded trained weights: {model_filepath}")
         elif os.path.isfile(default_weights):
-            model = YOLO(default_weights)
+            model = YOLO(default_weights, verbose=True)
             logger.info(f"Loaded default weights from local path: {default_weights}")
         else:
             # https://github.com/ultralytics/assets/releases/tag/v8.3.0/
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
             url = self.configuration.get("model_url",
                                          'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename)
-            model = YOLO(url)  # pass any model type
+            model = YOLO(url, verbose=True)  # pass any model type
             logger.info(f"Loaded default weights from url: {url}")
 
         model.to(device=self.device)
