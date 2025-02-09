@@ -5,15 +5,7 @@
   "scope": "public",
   "description": "A projected version in the YOLO series designed to enhance multi-task learning and detection capabilities with incremental architectural updates.",
   "attributes": {
-    "Provider": "Ultralytics",
-    "License": "AGPL 3.0",
-    "Category": "Model",
-    "Computer Vision": "Object Detection",
-    "Media Type": [
-      "Image",
-      "Video"
-    ],
-    "Deployed By": "Dataloop"
+    "License": "AGPL 3.0"
   },
   "codebase": {
     "type": "git",
