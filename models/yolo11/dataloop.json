@@ -5,15 +5,7 @@
   "scope": "public",
   "description": "An anticipated model in the YOLO framework aimed at addressing complex detection challenges with optimized scalability and improved computational efficiency.",
   "attributes": {
-    "Provider": "Ultralytics",
-    "License": "AGPL 3.0",
-    "Category": "Model",
-    "Computer Vision": "Object Detection",
-    "Media Type": [
-      "Image",
-      "Video"
-    ],
-    "Deployed By": "Dataloop"
+    "License": "AGPL 3.0"
   },
   "codebase": {
     "type": "git",
