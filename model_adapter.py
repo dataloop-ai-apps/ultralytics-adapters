@@ -11,6 +11,7 @@ import yaml
 import PIL
 import os
 import cv2
+import shutil
 
 logger = logging.getLogger('UltralyticsAdapter')
 
@@ -98,6 +99,7 @@ class Adapter(dl.BaseModelAdapter):
             src_images_path = os.path.join(data_path, subset_name, 'items')
             dst_images_path = os.path.join(data_path, subset_name, 'images')
             self.copy_files(src_images_path, dst_images_path)
+            shutil.rmtree(src_images_path)
 
             src_labels_path = os.path.join(data_path, 'labels', subset_name, 'annotations')
             dst_labels_path = os.path.join(data_path, subset_name, 'labels')
