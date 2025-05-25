@@ -284,7 +284,10 @@ class Adapter(dl.BaseModelAdapter):
             self.model_entity.metrics.create(samples=samples,
                                              dataset_id=self.model_entity.dataset_id)
             # save model output after each epoch end
-            self.configuration['start_epoch'] = self.current_epoch + 1
+            if 'train_configs' not in self.configuration:
+                self.configuration['train_configs'] = {}  # Ensure 'train_configs' exists
+            self.configuration['train_configs']['start_epoch'] = self.current_epoch + 1
+
             self.save_to_model(local_path=output_path, cleanup=False)
 
         self.model.add_callback(event='on_fit_epoch_end', func=on_epoch_end)
@@ -323,8 +326,9 @@ class Adapter(dl.BaseModelAdapter):
         )
 
         #  Check if the model (checkpoint) has already completed training for the specified number of epochs, if so, can start again without resuming
-        if 'start_epoch' in self.configuration and self.configuration['start_epoch'] == epochs:
-            self.model_entity.configuration['start_epoch'] = 0
+        train_configs = self.configuration.get('train_configs', {})
+        if train_configs.get('start_epoch') == epochs:
+            self.model_entity.configuration['train_configs']['start_epoch'] = 0
             self.model_entity.update()
 
     def create_box_annotation(self, res, annotation_collection, confidence_threshold):
@@ -412,10 +416,12 @@ class Adapter(dl.BaseModelAdapter):
         classes = predict_config.get('classes', None)
 
         # Check if batch contains both images and videos
-        mimetype_types = [item.mimetype.split('/')[0] for _, item in batch] # get the type of the mimetype without file extension
+        mimetype_types = [item.mimetype.split('/')[0] for _, item in
+                          batch]  # get the type of the mimetype without file extension
         if 'image' in mimetype_types and 'video' in mimetype_types:
-            raise ValueError('Batch contains both images and videos, which is not supported. Please split the batch into images and videos.')
-        
+            raise ValueError(
+                'Batch contains both images and videos, which is not supported. Please split the batch into images and videos.')
+
         batch_annotations = list()
         output_type = self.model_entity.output_type
 
@@ -453,23 +459,23 @@ class Adapter(dl.BaseModelAdapter):
             for video, item in batch:
                 video_annotations = item.annotations.builder()
                 results = self.model.track(source=video,  # Handle a file path
-                                        tracker='custom_tracker.yaml',
-                                        stream=True,
-                                        verbose=True,
-                                        iou=iou,
-                                        half=half,
-                                        max_det=max_det,
-                                        augment=augment,
-                                        agnostic_nms=agnostic_nms,
-                                        classes=classes,
-                                        vid_stride=vid_stride,
-                                        imgsz=imgsz,
-                                        save=False,
-                                        save_txt=False)
+                                           tracker='custom_tracker.yaml',
+                                           stream=True,
+                                           verbose=True,
+                                           iou=iou,
+                                           half=half,
+                                           max_det=max_det,
+                                           augment=augment,
+                                           agnostic_nms=agnostic_nms,
+                                           classes=classes,
+                                           vid_stride=vid_stride,
+                                           imgsz=imgsz,
+                                           save=False,
+                                           save_txt=False)
                 self.create_video_annotation(res=results,
-                                            annotation_collection=video_annotations,
-                                            confidence_threshold=confidence_threshold,
-                                            include_untracked=include_untracked)
+                                             annotation_collection=video_annotations,
+                                             confidence_threshold=confidence_threshold,
+                                             include_untracked=include_untracked)
                 batch_annotations.append(video_annotations)
 
         return batch_annotations
