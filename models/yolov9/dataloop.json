@@ -1,7 +1,7 @@
 {
   "name": "yolov9-ultralytics",
   "displayName": "YOLOv9 Ultralytics",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "scope": "public",
   "description": "A continuation of the YOLO series by Ultralytics, focusing on refined detection algorithms and model efficiency to support advanced object detection tasks.",
   "attributes": {
@@ -10,7 +10,7 @@
   "codebase": {
     "type": "git",
     "gitUrl": "https://github.com/dataloop-ai-apps/ultralytics-adapters.git",
-    "gitTag": "0.0.6"
+    "gitTag": "0.0.7"
   },
   "components": {
     "computeConfigs": [
