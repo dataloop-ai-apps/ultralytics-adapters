@@ -356,8 +356,10 @@ class Adapter(dl.BaseModelAdapter):
 
     def create_segmentation_annotation(self, res, annotation_collection, output_type, confidence_threshold):
         if res.masks is not None:
+            # reverse the order of the classes and the masks
+            reversed_cls = [b.cls.squeeze() for b in reversed(res.boxes)]
             for idx, d in enumerate(reversed(res.masks)):
-                cls = int(res.boxes[idx].cls.squeeze())
+                cls = int(reversed_cls[idx])
                 conf = float(res.boxes[idx].conf.squeeze())
                 mask = cv2.resize(
                     d.data[0].to(self.device).cpu().numpy(), (res.orig_shape[1], res.orig_shape[0]), cv2.INTER_NEAREST
