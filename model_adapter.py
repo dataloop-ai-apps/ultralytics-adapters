@@ -89,7 +89,7 @@ class Adapter(dl.BaseModelAdapter):
             pages = self.model_entity.dataset.items.list(filters=filters)
             if pages.items_count == 0:
                 raise ValueError(
-                    f'Could find box annotations in subset {subset}. Cannot train without annotation in the data subsets'
+                    f'Could not find box annotations in subset {subset}. Cannot train without annotation in the data subsets'
                 )
 
         self.dtlpy_to_yolo(input_path=data_path, output_path=data_path, model_entity=self.model_entity)
