@@ -38,8 +38,9 @@ class Adapter(dl.BaseModelAdapter):
         else:
             # https://github.com/ultralytics/assets/releases/tag/v8.3.0/
             logger.warning(f'Model path ({model_filepath}) not found! loading default model weights')
-            url = self.configuration.get("model_url",
-                                         'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename)
+            url = self.configuration.get(
+                "model_url", 'https://github.com/ultralytics/assets/releases/download/v8.3.0/' + model_filename
+            )
             model = YOLO(url, verbose=True)  # pass any model type
             logger.info(f"Loaded default weights from url: {url}")
 
@@ -60,14 +61,15 @@ class Adapter(dl.BaseModelAdapter):
         subsets = self.model_entity.metadata.get("system", dict()).get("subsets", None)
         if 'train' not in subsets:
             raise ValueError(
-                'Couldnt find train set. Yolo requires train and validation set for training. Add a train set DQL filter in the dl.Model metadata')
+                'Couldnt find train set. Yolo requires train and validation set for training. Add a train set DQL filter in the dl.Model metadata'
+            )
         if 'validation' not in subsets:
             raise ValueError(
-                'Couldnt find validation set. Yolo requires train and validation set for training. Add a validation set DQL filter in the dl.Model metadata')
+                'Couldnt find validation set. Yolo requires train and validation set for training. Add a validation set DQL filter in the dl.Model metadata'
+            )
 
         if len(self.model_entity.labels) == 0:
-            raise ValueError(
-                'model.labels is empty. Model entity must have labels')
+            raise ValueError('model.labels is empty. Model entity must have labels')
 
         ##########################
         # Convert to YOLO Format #
@@ -87,7 +89,8 @@ class Adapter(dl.BaseModelAdapter):
             pages = self.model_entity.dataset.items.list(filters=filters)
             if pages.items_count == 0:
                 raise ValueError(
-                    f'Could find box annotations in subset {subset}. Cannot train without annotation in the data subsets')
+                    f'Could not find box annotations in subset {subset}. Cannot train without annotation in the data subsets'
+                )
 
         self.dtlpy_to_yolo(input_path=data_path, output_path=data_path, model_entity=self.model_entity)
 
@@ -112,20 +115,26 @@ class Adapter(dl.BaseModelAdapter):
         model_entity.dataset.instance_map = model_entity.label_to_id_map
 
         # Convert train and validations sets to yolo format using dtlpy converters
-        self.convert_dataset_yolo(input_path=default_train_path,
-                                  output_path=os.path.join(output_path, 'labels', 'train'),
-                                  dataset=model_entity.dataset)
-        self.convert_dataset_yolo(input_path=default_validation_path,
-                                  output_path=os.path.join(output_path, 'labels', 'validation'),
-                                  dataset=model_entity.dataset)
+        self.convert_dataset_yolo(
+            input_path=default_train_path,
+            output_path=os.path.join(output_path, 'labels', 'train'),
+            dataset=model_entity.dataset,
+        )
+        self.convert_dataset_yolo(
+            input_path=default_validation_path,
+            output_path=os.path.join(output_path, 'labels', 'validation'),
+            dataset=model_entity.dataset,
+        )
 
     @staticmethod
     def convert_dataset_yolo(output_path, dataset, input_path=None):
-        conv = yolo_converters.DataloopToYolo(output_annotations_path=output_path,
-                                              input_annotations_path=input_path,
-                                              download_items=False,
-                                              download_annotations=False,
-                                              dataset=dataset)
+        conv = yolo_converters.DataloopToYolo(
+            output_annotations_path=output_path,
+            input_annotations_path=input_path,
+            download_items=False,
+            download_annotations=False,
+            dataset=dataset,
+        )
 
         yolo_converter_services = services.converters_service.DataloopConverters()
         loop = yolo_converter_services._get_event_loop()
@@ -234,11 +243,12 @@ class Adapter(dl.BaseModelAdapter):
         # https://docs.ultralytics.com/modes/train/#augmentation-settings-and-hyperparameters
         yaml_config = self.configuration.get('augmentation_configs', dict())
 
-        params = {'path': os.path.realpath(data_path),  # must be full path otherwise the train adds "datasets" to it
-                  'train': 'train',
-                  'val': 'validation',
-                  'names': list(self.model_entity.label_to_id_map.keys())
-                  }
+        params = {
+            'path': os.path.realpath(data_path),  # must be full path otherwise the train adds "datasets" to it
+            'train': 'train',
+            'val': 'validation',
+            'names': list(self.model_entity.label_to_id_map.keys()),
+        }
 
         data_yaml_filename = os.path.join(data_path, f'{self.model_entity.dataset_id}.yaml')
         yaml_config.update(params)
@@ -255,13 +265,15 @@ class Adapter(dl.BaseModelAdapter):
             if faas_callback is not None:
                 faas_callback(self.current_epoch, epochs)
             samples = list()
-            NaN_dict = {'box_loss': 1,
-                        'cls_loss': 1,
-                        'dfl_loss': 1,
-                        'mAP50(B)': 0,
-                        'mAP50-95(B)': 0,
-                        'precision(B)': 0,
-                        'recall(B)': 0}
+            NaN_dict = {
+                'box_loss': 1,
+                'cls_loss': 1,
+                'dfl_loss': 1,
+                'mAP50(B)': 0,
+                'mAP50-95(B)': 0,
+                'precision(B)': 0,
+                'recall(B)': 0,
+            }
             for metric_name, value in metrics.items():
                 legend, figure = metric_name.split('/')
                 logger.info(f'Updating figure {figure} with legend {legend} with value {value}')
@@ -277,12 +289,8 @@ class Adapter(dl.BaseModelAdapter):
                     else:
                         value = NaN_dict.get(figure, 0)
                     logger.warning(f'Value is not finite. For figure {figure} and legend {legend} using value {value}')
-                samples.append(dl.PlotSample(figure=figure,
-                                             legend=legend,
-                                             x=self.current_epoch,
-                                             y=value))
-            self.model_entity.metrics.create(samples=samples,
-                                             dataset_id=self.model_entity.dataset_id)
+                samples.append(dl.PlotSample(figure=figure, legend=legend, x=self.current_epoch, y=value))
+            self.model_entity.metrics.create(samples=samples, dataset_id=self.model_entity.dataset_id)
             # save model output after each epoch end
             if 'train_configs' not in self.configuration:
                 self.configuration['train_configs'] = {}  # Ensure 'train_configs' exists
@@ -322,7 +330,7 @@ class Adapter(dl.BaseModelAdapter):
             cls=cls,  # Classification loss gain
             dfl=dfl,  # DFL loss gain
             overlap_mask=overlap_mask,  # Overlap mask usage
-            patience=patience  # Early stopping patience
+            patience=patience,  # Early stopping patience
         )
 
         #  Check if the model (checkpoint) has already completed training for the specified number of epochs, if so, can start again without resuming
@@ -339,23 +347,23 @@ class Adapter(dl.BaseModelAdapter):
                 continue
             label = res.names[cls]
             xyxy = d.xyxy.squeeze()
-            annotation_collection.add(annotation_definition=dl.Box(left=float(xyxy[0]),
-                                                                   top=float(xyxy[1]),
-                                                                   right=float(xyxy[2]),
-                                                                   bottom=float(xyxy[3]),
-                                                                   label=label
-                                                                   ),
-                                      model_info={'name': self.model_entity.name,
-                                                  'model_id': self.model_entity.id,
-                                                  'confidence': conf})
+            annotation_collection.add(
+                annotation_definition=dl.Box(
+                    left=float(xyxy[0]), top=float(xyxy[1]), right=float(xyxy[2]), bottom=float(xyxy[3]), label=label
+                ),
+                model_info={'name': self.model_entity.name, 'model_id': self.model_entity.id, 'confidence': conf},
+            )
 
     def create_segmentation_annotation(self, res, annotation_collection, output_type, confidence_threshold):
         if res.masks is not None:
+            # reverse the order of the classes and the masks
+            reversed_cls = [b.cls.squeeze() for b in reversed(res.boxes)]
             for idx, d in enumerate(reversed(res.masks)):
-                cls = int(res.boxes[idx].cls.squeeze())
+                cls = int(reversed_cls[idx])
                 conf = float(res.boxes[idx].conf.squeeze())
-                mask = cv2.resize(d.data[0].to(self.device).cpu().numpy(), (res.orig_shape[1], res.orig_shape[0]),
-                                  cv2.INTER_NEAREST)
+                mask = cv2.resize(
+                    d.data[0].to(self.device).cpu().numpy(), (res.orig_shape[1], res.orig_shape[0]), cv2.INTER_NEAREST
+                )
                 if conf < confidence_threshold:
                     continue
                 label = res.names[cls]
@@ -364,10 +372,10 @@ class Adapter(dl.BaseModelAdapter):
                 else:  # mask
                     annotation = dl.Segmentation(geo=mask, label=label)
 
-                annotation_collection.add(annotation_definition=annotation,
-                                          model_info={'name': self.model_entity.name,
-                                                      'model_id': self.model_entity.id,
-                                                      'confidence': conf})
+                annotation_collection.add(
+                    annotation_definition=annotation,
+                    model_info={'name': self.model_entity.name, 'model_id': self.model_entity.id, 'confidence': conf},
+                )
 
     def create_video_annotation(self, res, annotation_collection, confidence_threshold, include_untracked):
         track_ids = list(range(1000, 10001))
@@ -388,18 +396,18 @@ class Adapter(dl.BaseModelAdapter):
                     continue
                 label = self.model.names[cls]
                 xyxy = box.xyxy.squeeze()
-                annotation_collection.add(annotation_definition=dl.Box(left=float(xyxy[0]),
-                                                                       top=float(xyxy[1]),
-                                                                       right=float(xyxy[2]),
-                                                                       bottom=float(xyxy[3]),
-                                                                       label=label
-                                                                       ),
-                                          model_info={'name': self.model_entity.name,
-                                                      'model_id': self.model_entity.id,
-                                                      'confidence': conf},
-                                          object_id=object_id,
-                                          frame_num=idx
-                                          )
+                annotation_collection.add(
+                    annotation_definition=dl.Box(
+                        left=float(xyxy[0]),
+                        top=float(xyxy[1]),
+                        right=float(xyxy[2]),
+                        bottom=float(xyxy[3]),
+                        label=label,
+                    ),
+                    model_info={'name': self.model_entity.name, 'model_id': self.model_entity.id, 'confidence': conf},
+                    object_id=object_id,
+                    frame_num=idx,
+                )
 
     def predict(self, batch, **kwargs):
         # https://docs.ultralytics.com/modes/predict/#inference-arguments
@@ -416,11 +424,13 @@ class Adapter(dl.BaseModelAdapter):
         classes = predict_config.get('classes', None)
 
         # Check if batch contains both images and videos
-        mimetype_types = [item.mimetype.split('/')[0] for _, item in
-                          batch]  # get the type of the mimetype without file extension
+        mimetype_types = [
+            item.mimetype.split('/')[0] for _, item in batch
+        ]  # get the type of the mimetype without file extension
         if 'image' in mimetype_types and 'video' in mimetype_types:
             raise ValueError(
-                'Batch contains both images and videos, which is not supported. Please split the batch into images and videos.')
+                'Batch contains both images and videos, which is not supported. Please split the batch into images and videos.'
+            )
 
         batch_annotations = list()
         output_type = self.model_entity.output_type
@@ -428,28 +438,32 @@ class Adapter(dl.BaseModelAdapter):
         # Process images batch
         if 'image' in mimetype_types:
             images = [stream for stream, _ in batch]
-            images_results = self.model.predict(source=images,
-                                                iou=iou,
-                                                half=half,
-                                                max_det=max_det,
-                                                augment=augment,
-                                                agnostic_nms=agnostic_nms,
-                                                classes=classes,
-                                                imgsz=imgsz,
-                                                save=False,
-                                                save_txt=False)  # save predictions as labels
+            images_results = self.model.predict(
+                source=images,
+                iou=iou,
+                half=half,
+                max_det=max_det,
+                augment=augment,
+                agnostic_nms=agnostic_nms,
+                classes=classes,
+                imgsz=imgsz,
+                save=False,
+                save_txt=False,
+            )  # save predictions as labels
 
             for _, res in enumerate(images_results):  # per image
                 image_annotations = dl.AnnotationCollection()
                 if output_type == 'box':
-                    self.create_box_annotation(res=res,
-                                               annotation_collection=image_annotations,
-                                               confidence_threshold=confidence_threshold)
+                    self.create_box_annotation(
+                        res=res, annotation_collection=image_annotations, confidence_threshold=confidence_threshold
+                    )
                 elif output_type == 'binary' or output_type == 'segment':  # SEGMENTATION
-                    self.create_segmentation_annotation(res=res,
-                                                        annotation_collection=image_annotations,
-                                                        confidence_threshold=confidence_threshold,
-                                                        output_type=output_type)
+                    self.create_segmentation_annotation(
+                        res=res,
+                        annotation_collection=image_annotations,
+                        confidence_threshold=confidence_threshold,
+                        output_type=output_type,
+                    )
                 else:
                     raise ValueError(f'Unsupported output type: {output_type}')
                 batch_annotations.append(image_annotations)
@@ -458,24 +472,28 @@ class Adapter(dl.BaseModelAdapter):
         if 'video' in mimetype_types:
             for video, item in batch:
                 video_annotations = item.annotations.builder()
-                results = self.model.track(source=video,  # Handle a file path
-                                           tracker='custom_tracker.yaml',
-                                           stream=True,
-                                           verbose=True,
-                                           iou=iou,
-                                           half=half,
-                                           max_det=max_det,
-                                           augment=augment,
-                                           agnostic_nms=agnostic_nms,
-                                           classes=classes,
-                                           vid_stride=vid_stride,
-                                           imgsz=imgsz,
-                                           save=False,
-                                           save_txt=False)
-                self.create_video_annotation(res=results,
-                                             annotation_collection=video_annotations,
-                                             confidence_threshold=confidence_threshold,
-                                             include_untracked=include_untracked)
+                results = self.model.track(
+                    source=video,  # Handle a file path
+                    tracker='custom_tracker.yaml',
+                    stream=True,
+                    verbose=True,
+                    iou=iou,
+                    half=half,
+                    max_det=max_det,
+                    augment=augment,
+                    agnostic_nms=agnostic_nms,
+                    classes=classes,
+                    vid_stride=vid_stride,
+                    imgsz=imgsz,
+                    save=False,
+                    save_txt=False,
+                )
+                self.create_video_annotation(
+                    res=results,
+                    annotation_collection=video_annotations,
+                    confidence_threshold=confidence_threshold,
+                    include_untracked=include_untracked,
+                )
                 batch_annotations.append(video_annotations)
 
         return batch_annotations
